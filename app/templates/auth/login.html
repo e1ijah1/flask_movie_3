@@ -1,0 +1,57 @@
+{% extends 'home/base.html' %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='web/css/login.css') }}" />
+
+<style>
+        html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 100px;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100px;
+    text-align:center;
+}
+
+    </style>
+{% endblock %}
+
+{% block content %}
+<br>
+<div class="container">
+    <form class="form-signin" action="{{ url_for('auth.login') }}"
+          method="POST">
+        {{ form.hidden_tag() }}
+        <h2 class="form-signin-heading">欢迎回来</h2>
+        <br>
+        <label for="inputEmail" class="sr-only">邮箱</label>
+        {{ form.email(class='form-control', id='inputEmail', type='email', placeholder="邮箱地址", required=True) }}
+        <!--<input type="email" id="inputEmail" class="form-control" placeholder="邮箱地址" required autofocus>-->
+        <label for="inputPassword" class="sr-only">密码</label>
+        {{ form.password(type='password', id='inputPassword', class='form-control', placeholder='密码', required=True) }}
+        <!--<input type="password" id="inputPassword" class="form-control" placeholder="密码" required>-->
+        <div class="checkbox">
+            <label>
+                {{ form.remember_me(type='checkbox', value='remember-me') }}{{form.remember_me.label }}
+                <!--<input type="checkbox" value="remember-me"> 记住我-->
+            </label>
+        </div>
+        <p>
+            忘记密码? <a href="{{ url_for('auth.password_reset_request') }}">点此重置密码</a>
+        </p>
+
+        {{ form.login(class='btn btn-lg btn-primary btn-block', type='submit') }}
+        <!--<button class="btn btn-lg btn-primary btn-block" type="submit">登录</button>-->
+    </form>
+
+</div>
+{% endblock %}
