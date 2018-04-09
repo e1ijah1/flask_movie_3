@@ -1,0 +1,32 @@
+{% extends 'auth/form_base.html' %}
+
+{% block form %}
+<div class="container">
+    <form class="form-signin" action="{{ url_for('auth.register') }}"
+          method="POST">
+        {{ form.hidden_tag() }}
+
+        <h2 class="form-signin-heading">加入我们</h2>
+        <br>
+        <label for="inputEmail" >邮箱</label>
+        {{ form.email(class='form-control', id='inputEmail', type='email', placeholder="邮箱地址", required=True) }}
+        <p></p>
+        <!--<input type="email" id="inputEmail" class="form-control" placeholder="邮箱地址" required autofocus>-->
+        <label for="inputName" >用户名</label>
+        {{ form.username(class='form-control', id='inputName', type='username', placeholder='用户名', required=True) }}
+        <p></p>
+        <label for="inputPassword" >密码</label>
+        {{ form.password(type='password', id='inputPassword', class='form-control', placeholder='密码', required=True) }}
+
+        <!--<input type="password" id="inputPassword" class="form-control" placeholder="密码" required>-->
+        <label for="inputPassword" >确认密码</label>
+        {{ form.password2(type='password', class='form-control', placeholder='确认密码', required=True) }}
+        <p>
+            已有账户? <a href="{{ url_for('auth.login') }}">点击登录</a>
+        </p>
+        {{ form.register(class='btn btn-lg btn-primary btn-block', type='submit') }}
+        <!--<button class="btn btn-lg btn-primary btn-block" type="submit">登录</button>-->
+    </form>
+
+</div>
+{% endblock %}

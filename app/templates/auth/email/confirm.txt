@@ -1,0 +1,22 @@
+{{ user.username }}, 您好:
+
+    您已注册F1renze的视频小站,
+
+    请点击如下链接, 以完成您邮箱的绑定:
+
+    {{ url_for('auth.confirm', token=token, _external=True) }}
+
+    (如果不能点击该链接地址, 请复制并粘贴到浏览器的地址输入框)
+
+    备注 : 无需回复此邮件.
+
+                                                            来自 : F1renze
+
+                                                            站点 : CiliCili Video
+
+                                                            {{ dt.strftime('%Y年%m月%d日') }}
+
+
+
+
+

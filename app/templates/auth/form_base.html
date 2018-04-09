@@ -1,0 +1,45 @@
+{% extends 'home/base.html' %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='web/css/login.css') }}"/>
+
+<style>
+        html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 100px;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100px;
+    text-align:center;
+}
+
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+{% for field in form.errors %}
+{% for error in form.errors[field] %}
+    <div class="alert alert-danger alert-dismissable fade show"
+    style="text-align:center;">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>{{error}}</strong>
+    </div>
+{% endfor %}
+{% endfor %}
+<br>
+
+{% block form %}
+{% endblock form %}
+
+{% endblock %}

@@ -7,8 +7,11 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from config import config
 from flask_login import LoginManager
+from flask_mail import Mail
 
 db = SQLAlchemy()
+mail=Mail()
+
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.login'
@@ -18,6 +21,7 @@ def create_app(configname):
     app.config.from_object(config[configname])
     db.init_app(app)
     login_manager.init_app(app)
+    mail.init_app(app)
 
     from app.admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint, url_prefix='/manage')

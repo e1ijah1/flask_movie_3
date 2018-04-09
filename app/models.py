@@ -12,6 +12,79 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 import hashlib
 
+# class VideoTag(db.Model):
+#     __tablename__ = 'video_tag'
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(128), unique=True)
+#     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
+    # videos = db.relationship('Video', backref='video_tag',
+    #                          lazy='dynamic', cascade='all, delete-orphan')
+
+    # def __repr__(self):
+    #     s = '<VideoTag %r>' % self.name
+    #     return s.decode('unicode-escape')
+
+''' #使用多对多模型出现一系列问题??
+# 1. (_mysql_exceptions.IntegrityError) (1215, 'Cannot add foreign key constraint')
+# 2. 需要指定 foreign_keys
+# 3. 需要指定 primaryjoin
+# 4.sqlalchemy.exc.ArgumentError
+#sqlalchemy.exc.ArgumentError: Could not locate any simple equality expressions involving locally mapped foreign key columns for primary join condition 'video_collect.user_id = "user".id' on relationship Video.collecters.  Ensure that referencing columns are associated with a ForeignKey or ForeignKeyConstraint, or are annotated in the join condition with the foreign() annotation. To allow comparison operators other than '==', the relationship can be marked as viewonly=True.
+
+class VideoCollect(db.Model):
+    __tablename__ = 'video_collect'
+    id = db.Column(db.Integer, primary_key=True)
+    video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    add_time = db.Column(db.DateTime, index=True, default=datetime.now)
+
+    def __repr__(self):
+        return '<VideoCollect %r>' % self.id
+'''
+# 关联表
+video_collect = db.Table('video_collect',
+                         db.Column('video_id', db.Integer, db.ForeignKey('video.id')),
+                         db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+                         )
+
+class Video(db.Model):
+    __tablename__ = 'video'
+    id = db.Column(db.Integer, primary_key=True)
+    uploader_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    title = db.Column(db.String(255), unique=True)
+    url = db.Column(db.String(255), unique=True)
+    intro = db.Column(db.Text)
+    cover = db.Column(db.String(255), unique=True)
+    # star = db.Column(db.SmallInteger)
+    playnum = db.Column(db.BigInteger)
+    comment_num = db.Column(db.BigInteger)
+    # tag_id = db.Column(db.Integer, db.ForeignKey('video_tag.id'))
+    add_time = db.Column(db.DateTime, index=True, default=datetime.now)
+    comments = db.relationship('Comment', backref='author',
+                              lazy='dynamic', cascade='all, delete-orphan')
+    # 收藏此视频的用户
+    collecters = db.relationship('User', secondary=video_collect,
+                 backref=db.backref('collect_videos', lazy='dynamic'),
+                                 lazy='dynamic', single_parent=True)
+    '''
+    sqlalchemy.exc.ArgumentError
+    sqlalchemy.exc.ArgumentError: On Video.collecters, delete-orphan cascade is not supported on a many-to-many or many-to-one relationship when single_parent is not set.   Set single_parent=True on the relationship().
+
+    '''
+    '''
+    collecters = db.relationship('VideoCollect',
+                                    foreign_keys=[VideoCollect.user_id],
+                                    backref=db.backref('user', lazy='joined'),
+                                    primaryjoin='VideoCollect.user_id==User.id',
+                                    lazy='dynamic', cascade='all, delete-orphan')
+    '''
+
+    def __init__(self, **kwargs):
+        pass
+
+    def __repr__(self):
+        s = '<Video %r>' % self.title
+        return s.decode('unicode-escape')
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
@@ -25,18 +98,32 @@ class User(db.Model, UserMixin):
     head_img = db.Column(db.Unicode(128), unique=False, nullable=True)
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
     confirmed = db.Column(db.Boolean, default=False)
-    userlogs = db.relationship('UserLog', backref='user', lazy='dynamic',
+    member_since = db.Column(db.DateTime(), default=datetime.now)
+    last_visit = db.Column(db.DateTime(), default=datetime.now)
+    user_logs = db.relationship('UserLog', backref='user', lazy='dynamic',
                                cascade='all, delete-orphan')
     comments = db.relationship('Comment', backref='user', lazy='dynamic',
                                cascade='all, delete-orphan')
-    member_since = db.Column(db.DateTime(), default=datetime.now)
-    last_visit = db.Column(db.DateTime(), default=datetime.now)
+    # 用户收藏的视频
+    '''
+    collect_videos = db.relationship('VideoCollect', foreign_keys=[VideoCollect.video_id],
+                                     backref=db.backref('user', lazy='joined'),
+                                     primaryjoin='VideoCollect.video_id==Video.id',
+                                     lazy='dynamic', cascade='all, delete-orphan')
+    '''
+    videos = db.relationship('Video', backref='uploader', lazy='dynamic',
+                             cascade='all, delete-orphan')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
         if self.role is None:
-            if self.email == current_app.config['ADMIN_EMAIL']:
+            if self.email == current_app.config['SITE_ADMIN_EMAIL']:
+                # 若用户电子邮箱为设定的邮箱, 同时创建超管账号
                 self.role = Role.query.filter_by(name='Administrator').first()
+                admin = Admin(name='superAdmin', email=current_app.config['SITE_ADMIN_EMAIL'],
+                              password=current_app.config['SITE_DEFAULT_ADMIN_PASSWD'])
+                db.session.add(admin)
+                db.session.commit()
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
         if self.email is not None and self.avatar_hash is None:
@@ -44,7 +131,7 @@ class User(db.Model, UserMixin):
 
     @property
     def password(self):
-        raise AttributeError(u'密码不可读!')
+        raise AttributeError('非明文密码, 不可读!')
 
     @password.setter
     def password(self, password):
@@ -146,59 +233,17 @@ class UserLog(db.Model):
     def __repr__(self):
         return '<UserLog %r>' % self.id
 
-
-class VedioTag(db.Model):
-    __tablename__ = 'vedio_tag'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), unique=True)
-    add_time = db.Column(db.DateTime, index=True, default=datetime.now)
-
-    def __repr__(self):
-        s = '<VedioTag %r>' % self.name
-        return s.decode('unicode-escape')
-
-
-class Vedio(db.Model):
-    __tablename__ = 'vedio'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), unique=True)
-    url = db.Column(db.String(255), unique=True)
-    intro = db.Column(db.Text)
-    cover = db.Column(db.String(255), unique=True)
-    star = db.Column(db.SmallInteger)
-    playnum = db.Column(db.BigInteger)
-    comment_num = db.Column(db.BigInteger)
-    tag_id = db.Column(db.Integer, db.ForeignKey('vedio_tag.id'))
-    add_time = db.Column(db.DateTime, index=True, default=datetime.now)
-
-    def __repr__(self):
-        s = '<Movie %r>' % self.title
-        return s.decode('unicode-escape')
-
-
 class Comment(db.Model):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
-    vedio_id = db.Column(db.Integer, db.ForeignKey('vedio.id'))
+    video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         s = '<Comment %r>' % self.content[:20]
         return s.decode('unicode-escape')
-
-
-class VedioCollect(db.Model):
-    __tablename__ = 'vedio_collect'
-    id = db.Column(db.Integer, primary_key=True)
-    vedio_id = db.Column(db.Integer, db.ForeignKey('vedio.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    add_time = db.Column(db.DateTime, index=True, default=datetime.now)
-
-    def __repr__(self):
-        return '<VedioCollect %r>' % self.id
-
 
 class Permission:
     WATCH = 1
@@ -230,9 +275,6 @@ class Role(db.Model):
             'Administrator': [Permission.WATCH, Permission.COMMENT,
                               Permission.COLLECTION, Permission.UPLOAD,
                               Permission.ADMIN],
-            'SuperAdministrtor': [Permission.WATCH, Permission.COMMENT,
-                                  Permission.COLLECTION, Permission.UPLOAD,
-                                  Permission.ADMIN, Permission.SUPER_ADMIN]
         }
         default_role = 'User'
         for r in roles:
@@ -265,6 +307,13 @@ class Role(db.Model):
         return s.decode('unicode-escape')
 
 
+'''
+'SuperAdministrtor': [Permission.WATCH, Permission.COMMENT,
+                                  Permission.COLLECTION, Permission.UPLOAD,
+                                  Permission.ADMIN, Permission.SUPER_ADMIN]
+admin账户默认为超级管理员, User最高升级至协管
+'''
+
 class Admin(db.Model):
     __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
@@ -272,6 +321,61 @@ class Admin(db.Model):
     email = db.Column(db.String(64), unique=True, index=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
+    admin_logs = db.relationship('AdminLog', backref='admin', lazy='dynamic')
+    operation_logs = db.relationship('OperationLog', backref='admin',
+                                     lazy='dynamic')
+
+
+    @property
+    def password(self):
+        raise AttributeError('密码不可读!')
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def generate_reset_token(self, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'reset': self.id}).decode('utf-8')
+
+    @staticmethod
+    def reset_password(token, new_password):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token.encode('utf-8'))
+        except:
+            return False
+        user = User.query.get(data.get('reset'))
+        if user is None:
+            return False
+        user.password = new_password
+        db.session.add(user)
+        return True
+
+    def generate_email_change_token(self, new_email, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'change_email': self.id, 'new_email': new_email}).decode('utf-8')
+
+    def change_email(self, token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token.encode('utf-8'))
+        except:
+            return False
+        if data.get('change_email') != self.id:
+            return False
+        new_email = data.get('new_email')
+        if new_email is None:
+            return False
+        if self.query.filter_by(email=new_email).first() is not None:
+            return False
+        self.email = new_email
+        self.avatar_hash = self.gravatar_hash()
+        db.session.add(self)
+        return True
 
     def __repr__(self):
         s = '<Admin %r>' % self.name

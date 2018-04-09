@@ -29,7 +29,7 @@
     <div class="container">
         <ul class="navbar-nav">
             <li class="nav-item active">
-                <a class="navbar-brand" href="{{ url_for('home.index') }}">Vedio</a>
+                <a class="navbar-brand" href="{{ url_for('home.index') }}">CiliCili&nbsp;Video</a>
             </li>
 
 
@@ -49,23 +49,29 @@
             <!--</li>-->
             <!--endif %}-->
 
-            <!-- if current_user.is_authenticated %}-->
-            <!--<li class="nav-item dropdown">-->
-            <!--<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbardrop">-->
-            <!--<img src="">-->
-            <!--账户 <b class="caret"></b></a>-->
-            <!--<div class="dropdown-menu">-->
-            <!--<a class="dropdown-item" href="">更改密码</a>-->
-            <!--<a class="dropdown-item" href="">更改邮箱</a>-->
-            <!--<a class="dropdown-item active bg-dark" href="">登出</a>-->
-            <!--</div>-->
-            <!--</li>-->
-            <!-- else %}-->
+             {% if current_user.is_authenticated %}
+
+            <li class="nav-item">
+                <a class="nav-link active bg-primary"
+                   href="{{ url_for('home.upload') }}">上传视频</a>
+            </li>&nbsp;
+
+            <li class="nav-item dropdown">
+            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbardrop">
+            <img src="{{ current_user.gravatar(size=31) }}" alt="用户头像">&nbsp;&nbsp;
+                <b class="caret">{{ current_user.username }}</b></a>
+            <div class="dropdown-menu">
+            <a class="dropdown-item" href="{{ url_for('auth.change_password') }}">更改密码</a>
+            <a class="dropdown-item" href="{{ url_for('auth.change_email_request') }}">更改邮箱</a>
+            <a class="dropdown-item active bg-dark" href="{{ url_for('auth.logout') }}">登出</a>
+            </div>
+            </li>
+            {% else %}
             <li class="nav-item">
                 <a class="nav-link active bg-dark"
                    href="{{ url_for('auth.login') }}">登录</a>
             </li>
-            <!--endif %}-->
+            {% endif %}
         </ul>
     </div>
 
@@ -74,7 +80,7 @@
 
 {% block message %}
 {% for message in get_flashed_messages() %}
-<!-- if alert_type }{ alert_type }{ else }alert-dismissable{ endif -->
+ <!--{# if alert_type #}{# alert_type #}{# else #}alert-dismissable{# endif #} -->
 <div class="alert alert-info
  alert-dismissable fade show"
      style="text-align:center;">
@@ -95,7 +101,7 @@
             <div class="col-md-12">
                 <hr>
                 <p>
-                    ©&nbsp;2018&nbsp;vedio.f1renze.net&nbsp;:p
+                    ©&nbsp;2018&nbsp;&nbsp;cilicili-video.f1renze.net&nbsp;&nbsp;<b>:p</b>
                 </p>
             </div>
         </div>

@@ -1,0 +1,19 @@
+{% extends 'auth/form_base.html' %}
+
+{% block form %}
+<div class="container form-group">
+    <form class="" enctype="multipart/form-data" method="POST"
+    action="{{ url_for('home.upload') }}">
+        {{ form.hidden_tag() }}
+        {{ form.title.label(class='form-contorl') }}
+        {{ form.title(class='form-contorl') }}
+        {{ form.video.label(class='form-contorl') }}
+        {{ form.video(class='form-contorl') }}
+        {{ form.intro.label(class='form-contorl') }}
+        {{ form.intro(class='form-contorl') }}
+        {{ form.cover.label(class='form-contorl') }}
+        {{ form.cover(class='form-contorl') }}
+        {{ form.submit() }}
+    </form>
+</div>
+{% endblock %}

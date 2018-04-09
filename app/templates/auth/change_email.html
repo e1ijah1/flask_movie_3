@@ -1,0 +1,20 @@
+{% extends 'auth/form_base.html' %}
+
+{% block form %}
+<div class="container">
+    <form class="form-signin" action="{{ url_for('auth.change_email_request') }}"
+          method="POST">
+        {{ form.hidden_tag() }}
+
+        <h2 class="form-signin-heading">更改账户邮箱</h2>
+        <br>
+        <label>新邮箱</label>
+        {{ form.email(class='form-control', id='inputEmail', type='email', placeholder='新邮箱', required=True) }}
+        <label>账户密码</label>
+        {{ form.password(class='form-control', type='password', placeholder='账户密码', required=True) }}
+
+        {{ form.submit(class='btn btn-lg btn-primary btn-block', type='submit') }}
+
+    </form>
+</div>
+{% endblock %}
