@@ -1,6 +1,6 @@
 {{ user.username }}, 您好:
 
-    您已注册F1renze的视频小站,
+    您已注册{{ site_name }},
 
     请点击如下链接, 以完成您邮箱的绑定:
 
@@ -12,7 +12,7 @@
 
                                                             来自 : F1renze
 
-                                                            站点 : CiliCili Video
+                                                            站点 : {{ site_name }}
 
                                                             {{ dt.strftime('%Y年%m月%d日') }}
 

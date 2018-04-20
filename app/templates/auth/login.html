@@ -2,7 +2,7 @@
 
 {% block form %}
 <div class="container">
-    <form class="form-signin" action="{{ url_for('auth.login') }}"
+    <form class="form-signin" action="{{ url_for('auth.login', next=request.args.get('next')) }}"
           method="POST">
         {{ form.hidden_tag() }}
 

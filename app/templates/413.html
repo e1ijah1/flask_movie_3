@@ -1,0 +1,10 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center">长传文件大小超出限制！最大支持500MB!</h1>
+    <p>
+        <a href="{{ url_for('home.index') }}">点击回到首页</a>
+    </p>
+</div>
+{% endblock %}

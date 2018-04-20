@@ -1,0 +1,128 @@
+/*comments*/
+
+.commentList {
+	padding-left: 6px;
+}
+
+.commentList .item {
+	list-style: none outside none;
+	margin-bottom: 6px;
+	margin-right: 6px;
+}
+
+.commentList .avatar {
+	border: 1px solid transparent;
+	float: left;
+}
+
+.comment-main {
+	position: relative;
+	margin-left: 64px;
+	border: 1px solid #dedede;
+	border-radius: 2px;
+	-webkit-box-shadow: 0 5px 10px 0 rgba(0, 0, 0, .1);
+	-moz-box-shadow: 0 5px 10px 0 rgba(0, 0, 0, .1);
+	box-shadow: 0 5px 10px 0 rgba(0, 0, 0, .1);
+	-webkit-transition: all .3s ease;
+	-moz-transition: all .3s ease;
+}
+
+.comment-main:hover {
+	-webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, .3)!important;
+	-moz-box-shadow: 0 2px 8px rgba(0, 0, 0, .3)!important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, .3)!important;
+}
+
+.comment-main:before,
+.comment-main:after {
+	position: absolute;
+	top: 11px;
+	left: -16px;
+	right: 100%;
+	width: 0;
+	height: 0;
+	display: block;
+	content: " ";
+	border-color: transparent;
+	border-style: solid solid outset;
+	pointer-events: none
+}
+
+.comment-main:before {
+	border-right-color: #dedede;
+	border-width: 8px
+}
+
+.comment-main:after {
+	border-width: 7px;
+	border-right-color: #f8f8f8;
+	margin-top: 1px;
+	margin-left: 2px
+}
+
+.comment-header {
+	padding: 10px 15px;
+	background: #f8f8f8;
+	border-bottom: 1px solid #eee
+}
+
+.comment-title {
+	margin: 0 0 8px 0;
+	font-size: 1.6rem;
+	line-height: 1.2
+}
+
+.comment-meta {
+	font-size: 13px;
+	color: #999;
+	line-height: 1.2
+}
+
+.comment-meta a {
+	color: #999
+}
+
+.comment-author {
+	font-weight: 700;
+	color: #999
+}
+
+.comment-body {
+	padding: 15px;
+	overflow: hidden
+}
+
+.comment-body>:last-child {
+	margin-bottom: 0
+}
+
+.commentList .comment-flip .avatar {
+	float: right
+}
+
+.comment-flip .comment-main {
+	margin-left: 0;
+	margin-right: 64px
+}
+
+.comment-flip .comment-main:before {
+	border-left-color: #dedede;
+	border-right-color: transparent
+}
+
+.comment-flip .comment-main:before,
+.comment-flip .comment-main:after {
+	left: 100%;
+	position: absolute;
+	right: -16px
+}
+
+.comment-flip .comment-main:after {
+	border-left-color: #f8f8f8;
+	border-right-color: transparent;
+	margin-left: auto;
+	margin-right: 2px
+}
+
+
+/*comments*/

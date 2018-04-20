@@ -1,0 +1,85 @@
+{% extends 'home/base.html' %}
+
+{% block title %}{{ key }}_搜索结果 -- CiliCili Video{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .bar {
+        weight:20px;
+        height:20px;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="list-group">
+                {% if query_count %}
+                <li class="list-group-item list-group-item-success">
+                    与&nbsp;"{{ key }}"&nbsp;相关的视频如下,&nbsp;共&nbsp;{{ query_count }}&nbsp;部
+                </li>
+                {% else %}
+                <li class="list-group-item list-group-item-warning">
+                    Sorry, 找不到与&nbsp;"{{ key }}"&nbsp;有关的视频！
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <p><br></p>
+
+        <div class="col-md-12">
+            {% for video in pagination.items %}
+
+            <div class="media rounded border border-info" style="padding: 10px;">
+                <a class="mr-3" href="{{ url_for('home.video',id=video.id) }}">
+                    <img width="150px" height="100px"
+                         src="{{ url_for('static',filename='uploads/images/'+video.cover) }}"
+                         alt="{{ video.title }}">
+                </a>
+                <div class="media-body">
+                    <h4 class="mt-0">{{ video.title }}
+                        <a href="{{ url_for('home.video', id=video.id) }}"
+                           class="btn btn-primary float-right">
+                            <span class="glyphicon glyphicon-play"></span>播放影片
+                        </a>
+                    </h4>
+                    {{ video.intro | safe }}
+
+                    <a href="{{ url_for('home.user', username=video.uploader.username) }}"
+                       class="float-right">
+                        <b>来自:&nbsp;
+                            <img class="ml-3 rounded" height="40px" width="40px"
+                                 src="{% if video.uploader.head_img %}{{ video.uploader.thumb_head_img }}
+                             {% else %}{{ video.uploader.gravatar(size=40) }}{% endif %}">
+                            &nbsp;&nbsp;{{ video.uploader.username }}</b>
+                    </a>
+
+                    <img class="bar" src="{{ url_for('static', filename='web/icons/open.png') }}">&nbsp;&nbsp;&nbsp;
+                    <small>{{ video.playnum }}</small>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <img class="bar" src="{{ url_for('static', filename='web/icons/comments.png') }}">&nbsp;&nbsp;&nbsp;
+                    <small>{{ video.comments.count() }}</small>
+                </div>
+            </div>
+            <p></p>
+            {% endfor %}
+        </div>
+
+        {% if query_count %}
+        <div class="mx-auto">
+            {% import 'home/_pagination_macros.html' as macros %}
+            <p><br></p>
+            <div class="col-md-12">
+                {{ macros.pagination_widget(pagination, 'home.search') }}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+</div>
+{% endblock %}

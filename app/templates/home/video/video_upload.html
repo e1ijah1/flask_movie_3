@@ -1,18 +1,42 @@
-{% extends 'auth/form_base.html' %}
+{% extends 'home/base.html' %}
 
-{% block form %}
-<div class="container form-group">
-    <form class="" enctype="multipart/form-data" method="POST"
+{% block styles %}
+{{ super() }}
+<script src="{{ url_for('static', filename='plugin/ckeditor/ckeditor.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+{% for field in form.errors %}
+{% for error in form.errors[field] %}
+    <div class="alert alert-danger alert-dismissable fade show"
+    style="text-align:center;">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>{{error}}</strong>
+    </div>
+{% endfor %}
+{% endfor %}
+
+<div class="container">
+    <form class="form-signin" enctype="multipart/form-data" method="POST"
     action="{{ url_for('home.upload') }}">
         {{ form.hidden_tag() }}
-        {{ form.title.label(class='form-contorl') }}
-        {{ form.title(class='form-contorl') }}
-        {{ form.video.label(class='form-contorl') }}
-        {{ form.video(class='form-contorl') }}
-        {{ form.intro.label(class='form-contorl') }}
-        {{ form.intro(class='form-contorl') }}
-        {{ form.cover.label(class='form-contorl') }}
-        {{ form.cover(class='form-contorl') }}
+        <div class="form-group">
+            {{ form.title.label(for='title') }}
+            {{ form.title(class='form-control', id='title', placeholder='输入视频标题') }}
+        </div>
+        <div class="'form-group">
+        {{ form.video.label(for='video') }}
+        {{ form.video(class='form-control', id='video') }}
+        </div>
+        <br>
+        <div class="form-group">
+            {{ form.intro.label(for='intro') }}
+            {{ form.intro(class='ckeditor form-control', id='intro', placeholder='介绍视频内容') }}
+        </div>
+        <div class="form-group">
+            {{ form.cover.label(for='cover') }}
+            {{ form.cover(class='form-control', id='cover') }}
+        </div>
         {{ form.submit() }}
     </form>
 </div>

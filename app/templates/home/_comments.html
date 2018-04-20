@@ -1,0 +1,28 @@
+<ul class="commentList">
+    {% for comment in comments %}
+    <li class="item">
+        <a href="{{ url_for('home.user', username=comment.author.username) }}">
+            <img alt="评论者头像" width="40px" height="40px"
+                 src="{% if comment.author.head_img %}{{ comment.author.thumb_head_img }}
+            {% else %}{{ comment.author.gravatar(size=40) }}{% endif %}" class="rounded-circle avatar" style="border:1px solid #abcdef;">
+        </a>
+        <div class="comment-main">
+            <div class="comment-header">
+                <div class="comment-meta">
+                    <a class="comment-author" href="user.html"><span class="text-primary">{{ comment.author.username }}</span></a>
+                    <span>评论于</span>
+                    <time title="{{ comment.add_time }}" datetime="{{ comment.add_time }}">{{ moment(comment.add_time, local=True).fromNow().format('L') }}</time>
+                </div>
+            </div>
+
+            <div class="comment-body">
+                <p>{{ comment.content | safe }}</p>
+                {% if comment.author == current_user %}
+                <a href="{{ url_for('home.delete_comment', id=comment.id) }}"
+                   class="btn btn-outline-danger float-right">删除评论</a>
+                {% endif %}
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>

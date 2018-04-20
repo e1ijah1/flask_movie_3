@@ -1,0 +1,150 @@
+{% extends 'home/base.html' %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    body {
+           background-color: #eee;
+    }
+
+    .info img {
+        weight:25px;
+        height:25px;
+    }
+</style>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='web/css/comments.css') }}">
+{% endblock %}
+
+{% block content %}
+{% for field in form.errors %}
+{% for error in form.errors[field] %}
+    <div class="alert alert-danger alert-dismissable fade show"
+    style="text-align:center;">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <strong>{{error}}</strong>
+    </div>
+{% endfor %}
+{% endfor %}
+
+<div class="container">
+    <div class="row">
+
+
+        <div class="col-md-8">
+            <div class="card rounded">
+                <div class="card-header rounded" style="height:50px;">
+                    <h4 class="text-center card-title">
+                        修改个人资料
+                    </h4>
+                </div>
+                <div class="card-body">
+
+                    <form enctype="multipart/form-data" method="POST"
+                          action="{{ url_for('home.edit_profile') }}">
+                        {{ form.hidden_tag() }}
+                        <div class="form-group">
+                            {{ form.username.label }}
+                            {{ form.username() }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.avatar.label }}
+                            {{ form.avatar() }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.location.label }}
+                            {{ form.location() }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.phone.label }}
+                            {{ form.phone() }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.intro.label }}
+                            {{ form.intro(id='um_editor') }}
+                        </div>
+                        {{ form.submit() }}
+                        <p></p>
+                        <a href="{{ url_for('home.user', username=current_user.username) }}"
+                           class="btn btn-danger form-control">取消编辑</a>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card rounded">
+                <img class="card-img-top rounded" src="{% if user.head_img %}{{ user.head_img }}
+                {% else %}{{ user.gravatar(size=300) }}{% endif %}"
+                     alt="用户头像">
+                <div class="card-body rounded">
+                    <h1 class="card-title"><b>{{ user.username }}</b></h1>
+                    <p>
+                        {% if user.info %}
+                        {{ user.info | safe }}
+                        {% else %}
+                        Ta 很懒, 还没有填写个人信息呢~
+                        {% endif %}
+                    </p>
+                    <hr>
+                    <p class="info">
+                        <img src="{{ url_for('static', filename='web/icons/location.png') }}">
+                        &nbsp;
+                        {% if user.location %}
+                        {{ user.location }}
+                        {% else %}
+                        未知区域
+                        {% endif %}
+                    </p>
+                    <p class="info">
+                        <img src="{{ url_for('static', filename='web/icons/mail.png') }}">
+                        &nbsp;
+                        {% if user.email %}
+                        {{ user.email }}
+                        {% else %}
+                        ???
+                        {% endif %}
+                    </p>
+                    <p class="info">
+                        <img src="{{ url_for('static', filename='web/icons/phone.png') }}">
+                        &nbsp;
+                        {% if user.phone %}
+                        {{ user.phone }}
+                        {% else %}
+                        还未填写手机号码
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="card-header rounded bg-secondary" style="height:50px;">
+                    <h4 class="text-center card-title text-light">当前资料展示</h4>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript"
+        src="{{ url_for('static', filename='plugin/ueditor-1.4.3.3/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8"
+        src="{{ url_for('static', filename='plugin/ueditor/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8"
+        src="{{ url_for('static', filename='plugin/ueditor/ueditor.all.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8"
+        src="{{ url_for('static', filename='plugin/ueditor/lang/zh-cn/zh-cn.js') }}"></script>
+<script>
+        UE.getEditor('um_editor', {
+            toolbars: [
+                ['undo', 'redo', 'emotion', 'bold', 'italic', 'forecolor', 'fontsize',
+                 'spechars', 'strikethrough', 'link',
+                'justifyleft', 'justifyright', 'justifycenter', 'justifyjustify',
+                'removeformat', 'preview', 'fullscreen',]
+            ],
+            initialFrameWidth: "100%",
+            initialFrameHeight: "100",
+        });
+</script>
+{% endblock %}

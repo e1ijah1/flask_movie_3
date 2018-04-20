@@ -20,23 +20,22 @@ def load_user(user_id):
 @auth.before_app_request
 def before_request():
     if current_user.is_authenticated:
-        current_user.ping()
+        ip = request.remote_addr
+        current_user.ping(ip)
     if current_user.is_authenticated and not current_user.confirmed \
         and request.endpoint[:5] != 'auth.' and request.endpoint != 'static':
         return redirect(url_for('auth.unconfirmed'))
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    # flash('登录')
-    alert_type='alert_info'
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
             return redirect(request.args.get('next') or url_for('home.index'))
-        flash(u'无效用户名或密码')
-    return render_template('auth/login.html', form=form, alert_type=alert_type)
+        flash('无效用户名或密码')
+    return render_template('auth/login.html', form=form)
 
 @auth.route('/logout')
 @login_required
@@ -52,7 +51,10 @@ def register():
         user = User(email=form.email.data, username=form.username.data,
                     password=form.password.data)
         db.session.add(user)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
         token = user.generate_confirmation_token()
         send_email(user.email, '确认你的账户', 'auth/email/confirm',
                   user=user, token=token)
@@ -95,7 +97,10 @@ def change_password():
         if current_user.verify_password(form.old_password.data):
             current_user.password = form.password.data
             db.session.add(current_user)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
             flash('密码已更改!')
             return redirect(url_for('home.index'))
         else:

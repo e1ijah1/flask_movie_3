@@ -9,13 +9,13 @@
     {% endblock metas %}
     {% block styles %}
 
-    <!--<link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css">-->
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugin/bootstrap-4.1.0-dist/css/bootstrap.min.css') }}">
 
-    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='web/xicon.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='web/xicon.png') }}" type="image/x-icon">
 
-    <link rel="shortcut icon" href="{{ url_for('static', filename = 'web/xicon.png') }}" type="image/x-icon">
-    <link rel="icon" href="{{ url_for('static', filename = 'web/xicon.png') }}" type="image/x-icon">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='web/css/page.css') }}">
     {% endblock styles %}
     {% endblock head %}
 </head>
@@ -38,10 +38,22 @@
             </li>
 
         </ul>
-        <form class="form-inline">
-            <input class="form-control" type="text" placeholder="Search">
-            <button class="btn btn-success" type="button">搜索</button>
+        <form class="form-inline" action="{{ url_for('home.search') }}" method="POST">
+            {% for field in search_form.errors %}
+            {% for error in search_form.errors[field] %}
+            <div class="alert alert-danger alert-dismissable fade show"
+                 style="text-align:center;">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong>{{error}}</strong>
+            </div>
+            {% endfor %}
+            {% endfor %}
+
+            {{ search_form.hidden_tag() }}
+            {{ search_form.search() }}
+            {{ search_form.submit() }}
         </form>
+
         <ul class="nav nav-pills navbar-nav navbar-right ">
             <!--if current_user.can(Permission.ADMIN) %}-->
             <!--<li class="nav-item">-->
@@ -49,7 +61,7 @@
             <!--</li>-->
             <!--endif %}-->
 
-             {% if current_user.is_authenticated %}
+            {% if current_user.is_authenticated %}
 
             <li class="nav-item">
                 <a class="nav-link active bg-primary"
@@ -57,14 +69,17 @@
             </li>&nbsp;
 
             <li class="nav-item dropdown">
-            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbardrop">
-            <img src="{{ current_user.gravatar(size=31) }}" alt="用户头像">&nbsp;&nbsp;
-                <b class="caret">{{ current_user.username }}</b></a>
-            <div class="dropdown-menu">
-            <a class="dropdown-item" href="{{ url_for('auth.change_password') }}">更改密码</a>
-            <a class="dropdown-item" href="{{ url_for('auth.change_email_request') }}">更改邮箱</a>
-            <a class="dropdown-item active bg-dark" href="{{ url_for('auth.logout') }}">登出</a>
-            </div>
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbardrop">
+                    <img class="rounded" height="31px" width="31px"
+                         src="{% if current_user.head_img %}{{ current_user.thumb_head_img }}
+                    {% else %}{{ current_user.gravatar(size=31) }}{% endif %}" alt="用户头像">&nbsp;&nbsp;
+                    <b class="caret">{{ current_user.username }}</b></a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="{{ url_for('home.user', username=current_user.username) }}">个人资料</a>
+                    <a class="dropdown-item" href="{{ url_for('auth.change_password') }}">更改密码</a>
+                    <a class="dropdown-item" href="{{ url_for('auth.change_email_request') }}">更改邮箱</a>
+                    <a class="dropdown-item active bg-dark" href="{{ url_for('auth.logout') }}">登出</a>
+                </div>
             </li>
             {% else %}
             <li class="nav-item">
@@ -80,7 +95,7 @@
 
 {% block message %}
 {% for message in get_flashed_messages() %}
- <!--{# if alert_type #}{# alert_type #}{# else #}alert-dismissable{# endif #} -->
+<!--{# if alert_type #}{# alert_type #}{# else #}alert-dismissable{# endif #} -->
 <div class="alert alert-info
  alert-dismissable fade show"
      style="text-align:center;">
@@ -90,7 +105,9 @@
 </div>
 {% endfor %}
 {% endblock message %}
-
+<p>
+    <br>
+</p>
 {% block content %}
 {% endblock %}
 
@@ -110,10 +127,17 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://cdn.bootcss.com/popper.js/1.12.5/umd/popper.min.js"></script>
-<script src="https://cdn.bootcss.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
-<script src="https://cdn.bootcss.com/holder/2.9.4/holder.min.js"></script>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>-->
+<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>-->
+<script src="{{  url_for('static', filename='plugin/bootstrap-4.1.0-dist/jquery.min.js') }}"></script>
+<script src="{{  url_for('static', filename='plugin/bootstrap-4.1.0-dist/popper.min.js') }}"></script>
+<script src="{{ url_for('static', filename='plugin/bootstrap-4.1.0-dist/js/bootstrap.min.js') }}"></script>
+
+<!--<script src="https://cdn.bootcss.com/holder/2.9.4/holder.min.js"></script>-->
+<script src="{{ url_for('static', filename='plugin/bootstrap-4.1.0-dist/holder.min.js') }}"></script>
+{{ moment.include_moment() }}
+{{ moment.lang("zh-CN") }}
 {% endblock scripts %}
 
 {% endblock body %}

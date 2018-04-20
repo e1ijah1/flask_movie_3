@@ -8,13 +8,21 @@ from flask_sqlalchemy import SQLAlchemy
 from config import config
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
+from flask_moment import Moment
+from flask_redis import FlaskRedis
 
 db = SQLAlchemy()
 mail=Mail()
+moment = Moment()
+rd = FlaskRedis()
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.login'
+
+videos = UploadSet('videos', ('mp4', 'flv', 'avi', 'wmv', 'mov', 'webm', 'mpeg4', 'ts', 'mpg', 'rm', 'rmvb', 'mkv'))
+images = UploadSet('images', IMAGES)
 
 def create_app(configname):
     app = Flask(__name__)
@@ -22,6 +30,15 @@ def create_app(configname):
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+    moment.init_app(app)
+    rd.init_app(app)
+
+    # flask-upload
+    configure_uploads(app, (videos, images))
+    # 限制文件大小500MB
+    '''声明　errorhandler 413 后, firefox显示连接已重置, 
+    stack overflow　上说在生产环境中使用其他web server, 可以正常返回结果'''
+    # patch_request_class(app, 2 * 1024 * 1024)
 
     from app.admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint, url_prefix='/manage')

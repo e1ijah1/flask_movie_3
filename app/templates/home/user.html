@@ -1,0 +1,234 @@
+{% extends 'home/base.html' %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    body {
+           background-color: #eee;
+    }
+
+    .info img {
+        width:25px;
+        height:25px;
+    }
+
+    .bar {
+        width:20px;
+        height:20px;
+    }
+
+
+</style>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='web/css/comments.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+
+        <div class="col-md-4">
+            <div class="card">
+                <img class="card-img-top rounded" src="{% if user.head_img %}{{ user.head_img }}
+                {% else %}{{ user.gravatar(size=300) }}{% endif %}"
+                     alt="用户头像">
+                <div class="card-body rounded">
+                    <h1 class="card-title"><b>{{ user.username }}</b></h1>
+                    <p>
+                        {% if user.info %}
+                        {{ user.info | safe }}
+                        {% else %}
+                        Ta 很懒, 还没有填写个人信息呢~
+                        {% endif %}
+                    </p>
+                    <hr>
+                    <p class="info">
+                        <img src="{{ url_for('static', filename='web/icons/location.png') }}">
+                        &nbsp;
+                        {% if user.location %}
+                        {{ user.location }}
+                        {% else %}
+                        未知区域
+                        {% endif %}
+                    </p>
+                    <p class="info">
+                        <img src="{{ url_for('static', filename='web/icons/mail.png') }}">
+                        &nbsp;
+                        {% if user.email %}
+                        {{ user.email }}
+                        {% else %}
+                        ???
+                        {% endif %}
+                    </p>
+                    <p class="info">
+                        <img src="{{ url_for('static', filename='web/icons/phone.png') }}">
+                        &nbsp;
+                        {% if user.phone %}
+                        {{ user.phone }}
+                        {% else %}
+                        还未填写手机号码
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header rounded" style="height:65px;">
+                    <h4 class="text-center card-title">
+                        用户资料
+                        {% if current_user == user %}
+                        &nbsp;
+                        <a class="btn btn-primary" href="{{ url_for('home.edit_profile') }}">编辑</a>
+                        {% endif %}
+                    </h4>
+                </div>
+            </div>
+            <!--text-light bg-secondary-->
+            <table class="table table-secondary table-striped table-bordered table-hover">
+                <tbody>
+                <tr>
+                    <td>注册时间</td>
+                    <td>{{ moment(user.member_since, local=True).fromNow().format('L') }}</td>
+                </tr>
+                <tr>
+                    <td>最后访问时间</td>
+                    <td>{{ moment(user.last_visit, local=True).fromNow().format('L') }}</td>
+                </tr>
+                <tr>
+                    <td>上传视频数</td>
+                    <td>{{ user.videos.count() }}</td>
+                </tr>
+                <tr>
+                    <td>评论数</td>
+                    <td>{{ user.comments.count() }}</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">最新评论</h4>
+                </div>
+                <div class="card-body">
+                    {% if comments %}
+                    <hr>
+                    <ul class="commentList">
+                        {% for comment in comments %}
+                        <li class="item">
+                            <a href="{{ url_for('home.user', username=comment.author.username) }}">
+                                <img alt="评论者头像" width="40px" height="40px"
+                                     src="{% if comment.author.head_img %}{{ comment.author.thumb_head_img }}
+                                {% else %}{{ comment.author.gravatar(size=40) }}{% endif %}"
+                                     class="rounded-circle avatar" style="border:1px solid #abcdef;">
+                            </a>
+                            <div class="comment-main">
+                                <div class="comment-header">
+                                    <div class="comment-meta">
+                                        <a class="comment-author" href="user.html"><span class="text-primary">{{ comment.author.username }}</span></a>
+                                        <span>评论于</span>&nbsp;
+                                        <a href="{{ url_for('home.video', id=comment.video.id) }}">{{
+                                            comment.video.title }}</a>
+                                        &nbsp;
+                                        <time title="{{ comment.add_time }}" datetime="{{ comment.add_time }}">{{
+                                            moment(comment.add_time, local=True).fromNow().format('L') }}
+                                        </time>
+                                    </div>
+                                </div>
+
+                                <div class="comment-body">
+                                    <p>{{ comment.content | safe }}</p>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <h3>暂时还没有评论呢~</h3>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <p><br></p>
+
+        <div class="col-md-12">
+
+
+            <ul class="list-group">
+                {% if pagination.items %}
+                <li class="list-group-item list-group-item-light text-center">
+                    <b>{{ user.username }}&nbsp;上传的视频</b>
+                </li>
+                {% else %}
+                <li class="list-group-item list-group-item-info text-center">
+                    <b>{{ user.username }}&nbsp;还没有上传过视频呢~</b>
+                </li>
+                {% endif %}
+            </ul>
+            <p></p>
+
+            {% for video in pagination.items %}
+
+            <div class="media rounded border border-info" style="padding: 10px;">
+                <a class="mr-3" href="{{ url_for('home.video',id=video.id) }}">
+                    <img width="150px" height="100px"
+                         src="{{ url_for('static',filename='uploads/images/'+video.cover) }}"
+                         alt="{{ video.title }}">
+                </a>
+                <div class="media-body">
+                    <h4 class="mt-0">{{ video.title }}
+                        <a href="{{ url_for('home.video', id=video.id) }}"
+                           class="btn btn-primary float-right">
+                            <span class="glyphicon glyphicon-play"></span>播放影片
+                        </a>
+                    </h4>
+                    <span>{{ video.intro | safe }}</span>
+
+                    {% if user == current_user %}
+                    <!--不支持多模态-->
+                    <div class="dropdown">
+                        <button type="button"
+                                class="btn btn-outline-danger dropdown-toggle float-right"
+                                data-toggle="dropdown">删除
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item active bg-danger"
+                               href="{{ url_for('home.delete_video', id=video.id) }}">确认删除</a>
+                            <a class="dropdown-item">取消</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="float-right">
+                        <img class="ml-3 rounded" height="40px" width="40px"
+                             src="{% if video.uploader.head_img %}{{ video.uploader.thumb_head_img }}
+                             {% else %}{{ video.uploader.gravatar(size=40) }}{% endif %}">
+                        &nbsp;&nbsp;<b>{{ video.uploader.username }}</b>
+                    </div>
+                    {% endif %}
+
+                    <img class="bar" src="{{ url_for('static', filename='web/icons/open.png') }}">&nbsp;&nbsp;&nbsp;
+                    <small>{{ video.playnum }}</small>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <img class="bar" src="{{ url_for('static', filename='web/icons/comments.png') }}">&nbsp;&nbsp;&nbsp;
+                    <small>{{ video.comments.count() }}</small>
+                </div>
+            </div>
+            <p></p>
+            {% endfor %}
+        </div>
+
+        {% if pagination.items %}
+        <div class="mx-auto">
+            {% import 'home/_pagination_macros.html' as macros %}
+            <p><br></p>
+            <div class="col-md-12">
+                {{ macros.pagination_widget(pagination, 'home.user', username=user.username) }}
+            </div>
+        </div>
+        {% endif %}
+
+
+    </div>
+</div>
+{% endblock %}

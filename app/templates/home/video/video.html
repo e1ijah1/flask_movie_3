@@ -2,189 +2,265 @@
 
 {% block title %}Vedio{% endblock %}
 
+{% block styles %}
+{{ super() }}
+
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/dplayer/1.22.2/DPlayer.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dplayer/1.22.2/DPlayer.min.js"></script>
+
+<!--<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='web/css/bootstrap-movie.css') }}">-->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='web/css/comments.css') }}">
+
+<style>
+    .bar img {
+        width: 25px;
+        height:25px;
+    }
+
+    .bar a:hover {
+        text-decoration:none;
+    }
+
+    .gray {
+        -webkit-filter: grayscale(100%);
+        -moz-filter: grayscale(100%);
+        -ms-filter: grayscale(100%);
+        -o-filter: grayscale(100%);
+
+        filter: grayscale(100%);
+
+        filter: gray;
+    }
+
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="container">
     <div class="row">
         <div class="col-md-8">
-            <div id="dplayer1" style="height:500px;width: 774px;"></div>
+            <div id="dplayer"></div>
+            <p></p>
+
+            <div class="float-right bar">
+                <a href="">
+                <img  class=""
+                     src="{{ url_for('static', filename='web/icons/like.png') }}" alt="赞">
+                </a>&nbsp;
+                {{ video.like }}&nbsp;&nbsp;&nbsp;&nbsp;
+                <img id="collect" {% if current_user not in video.collecters %}title="收藏视频"
+                     {% else %} title="取消收藏" {% endif %}
+                     data-toggle="tooltip" data-placement="bottom"
+                     src="{{ url_for('static', filename='web/icons/collection.png') }}" alt="收藏">
+                &nbsp;
+                {{ video.collecters.count() }}
+            </div>
+
+            <!-- JiaThis Button BEGIN -->
+            <div class="jiathis_style_24x24">
+                <a class="jiathis_button_copy"></a>
+                <a class="jiathis_button_weixin"></a>
+                <a class="jiathis_button_qzone"></a>
+                <a class="jiathis_button_cqq"></a>
+                <a class="jiathis_button_tsina"></a>
+                <a class="jiathis_button_douban"></a>
+                <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis"
+                   target="_blank"></a>
+                <a class="jiathis_counter_style"></a>
+            </div>
+            <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+            <!-- JiaThis Button END -->
         </div>
-        <div class="col-md-4" style="height:500px;">
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><span class="glyphicon glyphicon-facetime-video"></span>&nbsp;电影介绍</h3>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info" style="height:45px;">
+                    <h4 class="card-title" style="text-align:center">视频信息</h4>
                 </div>
-                <div class="panel-body" style="height:459px;">
-                    <table class="table">
+                <div class="card-body">
+                    <table class="table table-striped">
                         <tr>
-                            <td style="width:30%;color:#ccc;font-weight:bold;font-style:italic;">
-                                <span class="glyphicon glyphicon-film"></span>&nbsp;片名
-                            </td>
-                            <td>{{ movie.title }}</td>
+                            <th style="color:#ccc;font-weight:bold;">标题</th>
+                            <th>{{ video.title }}</th>
                         </tr>
                         <tr>
-                            <td style="color:#ccc;font-weight:bold;font-style:italic;">
-                                <span class="glyphicon glyphicon-tag"></span>&nbsp;标签
-                            </td>
-                            <td>{{ movie.tag.name }}</td>
-                        </tr>
-                        <tr>
-                            <td style="color:#ccc;font-weight:bold;font-style:italic;">
-                                <span class="glyphicon glyphicon-time"></span>&nbsp;片长
-                            </td>
-                            <td>{{ movie.length }}</td>
-                        </tr>
-                        <tr>
-                            <td style="color:#ccc;font-weight:bold;font-style:italic;">
-                                <span class="glyphicon glyphicon-map-marker"></span>&nbsp;地区
-                            </td>
-                            <td>{{ movie.area }}</td>
-                        </tr>
-                        <tr>
-                            <td style="color:#ccc;font-weight:bold;font-style:italic;">
-                                <span class="glyphicon glyphicon-star"></span>&nbsp;星级
-                            </td>
+                            <td style="color:#ccc;font-weight:bold;">上传者</td>
                             <td>
-                                <div>
-                                    {% for val in range(1,movie.star+1) %}
-                                        <span class="glyphicon glyphicon-star" style="color:#FFD119"></span>
-                                    {% endfor %}
-                                    {% for val in range(1,5-movie.star+1) %}
-                                        <span class="glyphicon glyphicon-star-empty" style="color:#FFD119"></span>
-                                    {% endfor %}
-                                </div>
+                                <a href="{{ url_for('home.user', username=video.uploader.username) }}">
+                                    <img class="img-thumbnail" height="40px" width="40px"
+                                         src="{% if video.uploader.head_img %}{{ video.uploader.thumb_head_img }}
+                                         {% else %}{{ video.uploader.gravatar(size=38) }}{% endif %}"
+                                         alt="上传者头像">&nbsp;
+                                    <span class="text-info" style="font-weight:bold;">
+                                        {{ video.uploader.username }}</span>
+                                </a>
                             </td>
+
                         </tr>
                         <tr>
-                            <td style="color:#ccc;font-weight:bold;font-style:italic;">
-                                <span class="glyphicon glyphicon-calendar"></span>&nbsp;上映时间
-                            </td>
-                            <td>{{ movie.release_time }}</td>
+                            <td style="color:#ccc;font-weight:bold;">添加时间</td>
+                            <td>{{ video.add_time.strftime('%Y年%m月%d日') }}</td>
                         </tr>
                         <tr>
-                            <td style="color:#ccc;font-weight:bold;font-style:italic;">
-                                <span class="glyphicon glyphicon-play"></span>&nbsp;播放数量
-                            </td>
-                            <td>{{ movie.playnum }}</td>
+                            <td style="color:#ccc;font-weight:bold;">播放次数</td>
+                            <td>{{ video.playnum }}</td>
                         </tr>
                         <tr>
-                            <td style="color:#ccc;font-weight:bold;font-style:italic;">
-                                <span class="glyphicon glyphicon-comment"></span>&nbsp;评论数量
-                            </td>
-                            <td>{{ movie.commentnum }}</td>
-                        </tr>
-                        <tr>
-                            <td style="color:#ccc;font-weight:bold;font-style:italic;">
-                                <span class="glyphicon glyphicon-picture"></span>&nbsp;影片介绍
-                            </td>
-                            <td>
-                                {{ movie.info }}
-                            </td>
+                            <td style="color:#ccc;font-weight:bold;">评论数:</td>
+                            <td>{{ video.comments.count() }}</td>
                         </tr>
                     </table>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-12" style="margin-top:6px;">
-            <div class="panel panel-danger">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><span class="glyphicon glyphicon-comment"></span>&nbsp;电影评论</h3>
+                <div class="card-footer" style="height:130px;overflow:scroll;">
+                    <h3>视频简介:</h3>
+                    <p>{{ video.intro | safe }}</p>
                 </div>
-                <div class="panel-body" style="height:459px;overflow:scroll;">
-                    {% if "user" not in session %}
-                        <div class="alert alert-danger alert-dismissible" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">
-                                <span aria-hidden="true">×</span>
-                                <span class="sr-only">Close</span>
-                            </button>
-                            <strong>请先<a href="{{ url_for('home.login') }}" target="_blank"
-                                         class="text-info">登录</a>，才可参与评论！</strong>
-                        </div>
-                    {% endif %}
-                    <ol class="breadcrumb" style="margin-top:6px;">
-                        <li>全部评论({{ movie.commentnum }})</li>
-                    </ol>
-                    {% if "user" in session %}
-                        {% for msg in get_flashed_messages(category_filter=["err"]) %}
-                            <p style="color:red;">{{ msg }}</p>
-                        {% endfor %}
-                        {% for msg in get_flashed_messages(category_filter=["ok"]) %}
-                            <p style="color:green;">{{ msg }}</p>
-                        {% endfor %}
-                        <form role="form" style="margin-bottom:6px;" method="post">
-                            <div class="form-group">
-                                <div>
-                                    <label for="input_content">{{ form.content.label }}</label>
-                                    {{ form.content }}
-                                </div>
-                                {% for err in form.content.errors %}
-                                    <div class="col-md-12">
-                                        <font style="color:red">{{ err }}</font>
-                                    </div>
-                                {% endfor %}
+            </div>
+
+        </div>
+
+        <p><br></p>
+
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-secondary" style="height:45px;">
+                    <h4 class="card-title" style="text-align:center">评论区</h4>
+                </div>
+                <div class="card-body">
+                    {% if not current_user.is_authenticated %}
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>请先<a href="{{ url_for('auth.login', next=request.path) }}"
+                                     class="text-info">登录</a>，才可参与评论！</strong>
+                    </div>
+                    {% else %}
+                    <form class="form-signin" action="{{ url_for('home.video', id=video.id) }}" method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="form-group">
+                            <h4 class="form-signin-heading">吐了个槽</h4>
+
+                            {% for field in form.errors %}
+                            {% for error in form.errors[field] %}
+                            <div class="alert alert-danger alert-dismissable fade show"
+                                 style="text-align:center;">
+                                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                                <strong>{{error}}</strong>
                             </div>
-                            {{ form.csrf_token }}
-                            {{ form.submit }}
-                            &nbsp;
-                            <a class="btn btn-danger" id="btn-col"><span class="glyphicon glyphicon-heart"></span>&nbsp;收藏电影</a>
-                        </form>
-                        <div class="col-md-12">
-                            <font style="color:green" id="show_col_msg"></font>
+                            {% endfor %}
+                            {% endfor %}
+
+                            {{ form.content(id='um_comment') }}
                         </div>
-                        <div class="clearfix"></div>
+                        {{ form.submit() }}
+                    </form>
                     {% endif %}
-                    <ul class="commentList">
-                        {% for v in page_data.items %}
-                            <li class="item cl">
-                                <a>
-                                    <i class="avatar size-L radius">
-                                        {% if v.user.face %}
-                                            <img alt="50x50"
-                                                 src="{{ url_for('static',filename='uploads/users/'+v.user.face) }}"
-                                                 class="img-circle"
-                                                 style="border:1px solid #abcdef;width:50px;">
-                                        {% else %}
-                                            <img alt="50x50" data-src="holder.js/50x50" class="img-circle"
-                                                 style="border:1px solid #abcdef;width:50px;">
-                                        {% endif %}
-                                    </i>
-                                </a>
-                                <div class="comment-main">
-                                    <header class="comment-header">
-                                        <div class="comment-meta">
-                                            <a class="comment-author" href="user.html">{{ v.user.name }}</a>
-                                            评论于
-                                            <time title="{{ v.addtime }}" datetime="{{ v.addtime }}">
-                                                {{ v.addtime }}
-                                            </time>
-                                        </div>
-                                    </header>
-                                    <div class="comment-body">
-                                        <p>{{ v.content | safe }}</p>
-                                    </div>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                    <div class="col-md-12 text-center">
-                        {{ pg.page(page_data,'home.video',movie.id) }}
+
+                    <div id="comments">
+                        {% if comments %}
+                        <hr>
+                        {% include 'home/_comments.html' %}
+                        {% endif %}
                     </div>
                 </div>
+
+                <div class="card-footer">
+                    <div style="margin: 0px auto;display: table;">
+                        {% if pagination.items %}
+                        {% import 'home/_pagination_macros.html' as macros %}
+                        {{ macros.pagination_widget(pagination, 'home.video', fragment='#comments', id=video.id) }}
+                        {% else %}
+                        <h3>暂时还没有评论呢~</h3>
+                        {% endif %}
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
+
 <script type="text/javascript">
     const dp = new DPlayer({
         container: document.getElementById('dplayer'),
         video: {
-            url: "{{ url_for('static', filename='uploads/video/'+video.url) }}",
+            url: "{{ url_for('static', filename='uploads/videos/'+video.url) }}",
         },
         danmaku: {
             id: '{{ video.id }}',
-            api: '/tm/ '
+            api: '/tm/'
         }
+    });
+
+</script>
+
+<script type="text/javascript"
+        src="{{ url_for('static', filename='plugin/ueditor-1.4.3.3/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8"
+        src="{{ url_for('static', filename='plugin/ueditor/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8"
+        src="{{ url_for('static', filename='plugin/ueditor/ueditor.all.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8"
+        src="{{ url_for('static', filename='plugin/ueditor/lang/zh-cn/zh-cn.js') }}"></script>
+<script>
+        UE.getEditor('um_comment', {
+            toolbars: [
+                ['undo', 'redo', 'emotion', 'bold', 'spechars', 'forecolor', 'fontsize',
+                'strikethrough', 'link', 'removeformat', 'preview', 'fullscreen',]
+            ],
+            initialFrameWidth: "100%",
+            initialFrameHeight: "100",
+        });
+
+</script>
+
+<script>
+    $(document).ready(function(){
+        //提示
+        $('[data-toggle="tooltip"]').tooltip();
+
+        {% if not current_user.is_authenticated %}
+        $('#collect').click(function(){
+            alert('你还没有登录呢, 请先登录!')
+        });
+
+        {% elif current_user not in video.collecters %}
+        $("#collect").addClass("gray");
+        //light
+        $("#collect").mouseover(function(){
+            $("#collect").removeClass();
+            //此处不适合用toggleClass
+        });
+
+        $("#collect").mouseout(function(){
+            $("#collect").addClass("gray");
+        });
+
+        //$("#collect").attr("title", "收藏视频")//延迟
+
+        //ajax请求收藏视频, 从而避免刷新页面
+        $("#collect").click(function(){
+            $("#collect").load("{{ url_for('home.video_collect', id=video.id) }}", function(responseTxt){
+                if(responseTxt=="True")
+                    alert('视频收藏成功');
+                    $("#collect").removeClass();
+
+            });
+        });
+        {% else %}
+        //$("#collect").attr("title", "取消收藏")
+        //取消收藏
+        $("#collect").click(function(){
+            $("#collect").load("{{ url_for('home.video_uncollect', id=video.id) }}", function(responseTxt){
+                if(responseTxt=="True")
+                    alert('视频已经从收藏中移除')
+                    $("#collect").addClass("gray");
+            });
+        });
+        {% endif %}
+
     });
 </script>
 {% endblock %}

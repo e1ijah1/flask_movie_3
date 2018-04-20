@@ -12,17 +12,17 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 import hashlib
 
-# class VideoTag(db.Model):
-#     __tablename__ = 'video_tag'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(128), unique=True)
-#     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
-    # videos = db.relationship('Video', backref='video_tag',
-    #                          lazy='dynamic', cascade='all, delete-orphan')
+class VideoTag(db.Model):
+    __tablename__ = 'video_tag'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), unique=True)
+    add_time = db.Column(db.DateTime, index=True, default=datetime.now)
+    videos = db.relationship('Video', backref='video_tag',
+                             lazy='dynamic', cascade='all, delete-orphan')
 
-    # def __repr__(self):
-    #     s = '<VideoTag %r>' % self.name
-    #     return s.decode('unicode-escape')
+    def __repr__(self):
+        s = '<VideoTag %r>' % self.name
+        return s.decode('unicode-escape')
 
 ''' #使用多对多模型出现一系列问题??
 # 1. (_mysql_exceptions.IntegrityError) (1215, 'Cannot add foreign key constraint')
@@ -47,6 +47,11 @@ video_collect = db.Table('video_collect',
                          db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
                          )
 
+video_like = db.Table('video_like',
+                      db.Column('video_id', db.Integer, db.ForeignKey('video.id')),
+                      db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+                      )
+
 class Video(db.Model):
     __tablename__ = 'video'
     id = db.Column(db.Integer, primary_key=True)
@@ -54,13 +59,12 @@ class Video(db.Model):
     title = db.Column(db.String(255), unique=True)
     url = db.Column(db.String(255), unique=True)
     intro = db.Column(db.Text)
-    cover = db.Column(db.String(255), unique=True)
-    # star = db.Column(db.SmallInteger)
+    cover = db.Column(db.Unicode(255), unique=True)
+    like = db.Column(db.BigInteger)
     playnum = db.Column(db.BigInteger)
-    comment_num = db.Column(db.BigInteger)
-    # tag_id = db.Column(db.Integer, db.ForeignKey('video_tag.id'))
+    tag_id = db.Column(db.Integer, db.ForeignKey('video_tag.id'))
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
-    comments = db.relationship('Comment', backref='author',
+    comments = db.relationship('Comment', backref='video',
                               lazy='dynamic', cascade='all, delete-orphan')
     # 收藏此视频的用户
     collecters = db.relationship('User', secondary=video_collect,
@@ -80,7 +84,17 @@ class Video(db.Model):
     '''
 
     def __init__(self, **kwargs):
-        pass
+        super(Video, self).__init__(**kwargs)
+        self.playnum = 0
+        self.like = 0
+
+    def play(self):
+        self.playnum += 1
+        db.session.add(self)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
 
     def __repr__(self):
         s = '<Video %r>' % self.title
@@ -92,17 +106,19 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(128), unique=True, index=True)
     email = db.Column(db.String(64), unique=True, index=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    phone = db.Column(db.String(11), unique=True, index=True)
+    phone = db.Column(db.String(11), index=True)
+    location = db.Column(db.String(64))
     info = db.Column(db.Text)
     avatar_hash = db.Column(db.String(32))
     head_img = db.Column(db.Unicode(128), unique=False, nullable=True)
-    role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
+    thumb_head_img = db.Column(db.Unicode(128), unique=False, nullable=True)
     confirmed = db.Column(db.Boolean, default=False)
     member_since = db.Column(db.DateTime(), default=datetime.now)
     last_visit = db.Column(db.DateTime(), default=datetime.now)
+    get_like_num = db.Column(db.BigInteger)
     user_logs = db.relationship('UserLog', backref='user', lazy='dynamic',
                                cascade='all, delete-orphan')
-    comments = db.relationship('Comment', backref='user', lazy='dynamic',
+    comments = db.relationship('Comment', backref='author', lazy='dynamic',
                                cascade='all, delete-orphan')
     # 用户收藏的视频
     '''
@@ -111,23 +127,73 @@ class User(db.Model, UserMixin):
                                      primaryjoin='VideoCollect.video_id==Video.id',
                                      lazy='dynamic', cascade='all, delete-orphan')
     '''
+    like_videos = db.relationship('Video', secondary=video_like,
+                                 backref=db.backref('likers', lazy='dynamic'),
+                                 lazy='dynamic', single_parent=True)
     videos = db.relationship('Video', backref='uploader', lazy='dynamic',
                              cascade='all, delete-orphan')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
-        if self.role is None:
-            if self.email == current_app.config['SITE_ADMIN_EMAIL']:
-                # 若用户电子邮箱为设定的邮箱, 同时创建超管账号
-                self.role = Role.query.filter_by(name='Administrator').first()
-                admin = Admin(name='superAdmin', email=current_app.config['SITE_ADMIN_EMAIL'],
-                              password=current_app.config['SITE_DEFAULT_ADMIN_PASSWD'])
-                db.session.add(admin)
+        if Admin.query.first() is None:
+            admin = Admin(name='admin',
+                          email=current_app.config['SITE_ADMIN_EMAIL'] or 'f1renze@163.com', password='admin')
+            db.session.add(admin)
+            try:
                 db.session.commit()
-            if self.role is None:
-                self.role = Role.query.filter_by(default=True).first()
+            except:
+                db.session.rollback()
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = self.gravatar_hash()
+
+    def collect(self, video):
+        if video not in self.collect_videos:
+            # video_collect(video_id=video.id, user_id=self.id) # not callable
+            self.collect_videos.append(video)
+            db.session.add(self)
+            try:
+                db.session.commit()
+                return True
+            except:
+                db.session.rollback()
+                return False
+
+    def uncollect(self, video):
+        if video in self.collect_videos:
+            self.collect_videos.remove(video)
+            db.session.add(self)
+            try:
+                db.session.commit()
+                return True
+            except:
+                db.session.rollback()
+                return False
+
+    def like(self, ip, video):
+        if video not in self.like_videos:
+            self.like_videos.append(video)
+            user_log = UserLog(user=self, ip=ip, info='点赞')
+            db.session.add(user_log)
+            db.session.add(self)
+            try:
+                db.session.commit()
+                return True
+            except:
+                db.session.rollback()
+                return False
+
+    def unlike(self, ip, video):
+        if video in self.like_videos:
+            self.like_videos.remove(video)
+            user_log = UserLog(user=self, ip=ip, info='取消点赞')
+            db.session.add(user_log)
+            db.session.add(self)
+            try:
+                db.session.commit()
+                return True
+            except:
+                db.session.rollback()
+                return False
 
     @property
     def password(self):
@@ -154,6 +220,10 @@ class User(db.Model, UserMixin):
             return False
         self.confirmed = True
         db.session.add(self)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
         return True
 
     def generate_reset_token(self, expiration=3600):
@@ -172,7 +242,12 @@ class User(db.Model, UserMixin):
             return False
         user.password = new_password
         db.session.add(user)
-        return True
+        try:
+            db.session.commit()
+            return True
+        except:
+            db.session.rollback()
+            return False
 
     def generate_email_change_token(self, new_email, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
@@ -194,20 +269,22 @@ class User(db.Model, UserMixin):
         self.email = new_email
         self.avatar_hash = self.gravatar_hash()
         db.session.add(self)
-        return True
+        try:
+            db.session.commit()
+            return True
+        except:
+            db.session.rollback()
+            return False
 
-    def can(self, perm):
-        return self.role is not None and self.role.has_permission(perm)
-
-    def is_admin(self):
-        return self.can(Permission.ADMINISTER)
-
-    def is_super(self):
-        return self.can(Permission.SUPER_ADMIN)
-
-    def ping(self):  # 刷新用户的最后访问时间
-        self.last_seen = datetime.utcnow()
+    def ping(self, ip):  # 刷新用户的最后访问时间
+        user_log = UserLog(user_id=self.id, ip=ip, info='点赞')
+        self.last_visit = datetime.now()
         db.session.add(self)
+        db.session.add(user_log)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
 
     def gravatar_hash(self):
         return hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
@@ -227,7 +304,8 @@ class UserLog(db.Model):
     __tablename__ = 'user_log'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    ip = db.Column(db.String(128))
+    ip = db.Column(db.String(128), index=True)
+    info = db.Column(db.String(32))
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
@@ -245,74 +323,6 @@ class Comment(db.Model):
         s = '<Comment %r>' % self.content[:20]
         return s.decode('unicode-escape')
 
-class Permission:
-    WATCH = 1
-    COMMENT = 2
-    COLLECTION = 4
-    UPLOAD = 8
-    ADMIN = 16
-    SUPER_ADMIN = 32
-
-
-class Role(db.Model):
-    __tablename__ = 'role'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), unique=True)
-    default = db.Column(db.Boolean, default=False)
-    permissions = db.Column(db.Integer)
-    users = db.relationship('User', backref='role', lazy='dynamic')
-    admins = db.relationship('Admin', backref='role', lazy='dynamic')
-
-    def __init__(self, **kwargs):
-        super(Role, self).__init__(**kwargs)
-        if self.permissions is None:
-            self.permissions = 0
-
-    @staticmethod
-    def insert_roles():
-        roles = {
-            'User': [Permission.WATCH, Permission.COMMENT, Permission.COLLECTION],
-            'Administrator': [Permission.WATCH, Permission.COMMENT,
-                              Permission.COLLECTION, Permission.UPLOAD,
-                              Permission.ADMIN],
-        }
-        default_role = 'User'
-        for r in roles:
-            role = Role.query.filter_by(name=r).first()
-            if role is None:
-                role = Role(name=r)
-            role.reset_permissions()
-            for perm in roles[r]:
-                role.add_permission(perm)
-            role.default = (role.name == default_role)
-            db.session.add(role)
-        db.session.commit()
-
-    def add_permission(self, perm):
-        if not self.has_permission(perm):
-            self.permissions += perm
-
-    def remove_permission(self, perm):
-        if self.has_permission(perm):
-            self.permissions -= perm
-
-    def reset_permissions(self):
-        self.permissions = 0
-
-    def has_permission(self, perm):
-        return self.permissions & perm == perm
-
-    def __repr__(self):
-        s = '<Role %r>' % self.name
-        return s.decode('unicode-escape')
-
-
-'''
-'SuperAdministrtor': [Permission.WATCH, Permission.COMMENT,
-                                  Permission.COLLECTION, Permission.UPLOAD,
-                                  Permission.ADMIN, Permission.SUPER_ADMIN]
-admin账户默认为超级管理员, User最高升级至协管
-'''
 
 class Admin(db.Model):
     __tablename__ = 'admin'
@@ -320,7 +330,6 @@ class Admin(db.Model):
     name = db.Column(db.String(128), unique=True, index=True)
     email = db.Column(db.String(64), unique=True, index=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
     admin_logs = db.relationship('AdminLog', backref='admin', lazy='dynamic')
     operation_logs = db.relationship('OperationLog', backref='admin',
                                      lazy='dynamic')
@@ -353,6 +362,10 @@ class Admin(db.Model):
             return False
         user.password = new_password
         db.session.add(user)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
         return True
 
     def generate_email_change_token(self, new_email, expiration=3600):
@@ -375,6 +388,10 @@ class Admin(db.Model):
         self.email = new_email
         self.avatar_hash = self.gravatar_hash()
         db.session.add(self)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
         return True
 
     def __repr__(self):

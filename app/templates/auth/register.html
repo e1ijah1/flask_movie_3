@@ -19,8 +19,8 @@
         {{ form.password(type='password', id='inputPassword', class='form-control', placeholder='密码', required=True) }}
 
         <!--<input type="password" id="inputPassword" class="form-control" placeholder="密码" required>-->
-        <label for="inputPassword" >确认密码</label>
-        {{ form.password2(type='password', class='form-control', placeholder='确认密码', required=True) }}
+        <label for="inputPassword2" >确认密码</label>
+        {{ form.password2(type='password',id='inputPassword2', class='form-control', placeholder='确认密码', required=True) }}
         <p>
             已有账户? <a href="{{ url_for('auth.login') }}">点击登录</a>
         </p>
