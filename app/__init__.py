@@ -11,11 +11,13 @@ from flask_mail import Mail
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_moment import Moment
 from flask_redis import FlaskRedis
+from flask_admin import Admin
 
 db = SQLAlchemy()
 mail=Mail()
 moment = Moment()
 rd = FlaskRedis()
+f_admin = Admin(name='后台管理', template_mode='bootstrap3')
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -32,6 +34,7 @@ def create_app(configname):
     mail.init_app(app)
     moment.init_app(app)
     rd.init_app(app)
+    f_admin.init_app(app)
 
     # flask-upload
     configure_uploads(app, (videos, images))
@@ -40,8 +43,8 @@ def create_app(configname):
     stack overflow　上说在生产环境中使用其他web server, 可以正常返回结果'''
     # patch_request_class(app, 2 * 1024 * 1024)
 
-    from app.admin import admin as admin_blueprint
-    app.register_blueprint(admin_blueprint, url_prefix='/manage')
+    from app.admin_blueprint import admin_blueprint
+    app.register_blueprint(admin_blueprint)
     from app.home import home as home_blueprint
     app.register_blueprint(home_blueprint)
     from app.auth import auth as auth_blueprint

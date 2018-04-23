@@ -123,44 +123,41 @@ def delete_comment(id):
 @home.route('/video/collect/<int:id>')
 def video_collect(id):
     video = Video.query.get_or_404(id)
-    if not current_user.is_authenticated:
-        flash('你还没有登录呢, 请先登录!')
-    else:
-        if current_user.collect(video):
+    if current_user.collect(video):
             # flash('视频收藏成功')
-            return 'True'
-        else:
+        return 'True:'+str(video.collecters.count())
+    else:
             # flash('额, 发生未知错误, 请重试')
-            return 'False'
+        return 'False:'+str(video.collecters.count())
 
 @home.route('/video/uncollect/<int:id>')
 def video_uncollect(id):
     video = Video.query.get_or_404(id)
-    if not current_user.is_authenticated:
-        flash('你还没有登录呢, 请先登录!')
+    if current_user.uncollect(video):
+        # flash('视频已经从收藏中移除')
+        return 'True:'+str(video.collecters.count())
     else:
-        if current_user.uncollect(video):
-            flash('视频已经从收藏中移除')
-            return 'True'
-        else:
-            flash('额, 发生未知错误, 请重试')
-            return 'False'
+        # flash('额, 发生未知错误, 请重试')
+        return 'False:'+str(video.collecters.count())
+
 
 @home.route('/video/like/<int:id>')
 def video_like(id):
     video = Video.query.get_or_404(id)
-    if not current_user.is_authenticated:
-        flash('你还没有登录呢, 请先登录!')
+    ip = request.remote_addr
+    if current_user.like(ip, video):
+        return 'True:'+str(video.likers.count())
     else:
-        current_user.like(video)
+        return 'False:'+str(video.likers.count())
 
 @home.route('/video/unlike/<int:id>')
 def video_unlike(id):
     video = Video.query.get_or_404(id)
-    if not current_user.is_authenticated:
-        flash('你还没有登录呢, 请先登录!')
-
-
+    ip = request.remote_addr
+    if current_user.unlike(ip, video):
+        return 'True:'+str(video.likers.count())
+    else:
+        return 'False:'+str(video.likers.count())
 
 @home.route('/video/<int:id>', methods=['GET', 'POST'])
 def video(id):
@@ -257,11 +254,13 @@ def search():
     #     return redirect(url_for('home.index'))
     # query = Video.query.filter(Video.title.ilike('%' + key + '%'))
 
-
+'''
+api url 升级为v2, 故变更为 '/<name>/v2/'
+'''
 from app import rd
 from flask import Response
 import json
-@home.route("/tm/", methods=['GET', 'POST'])
+@home.route("/tm/v2/", methods=['GET', 'POST'])
 def tm():
     """
     弹幕消息处理
@@ -282,8 +281,8 @@ def tm():
                 "code": 1,
                 "danmaku": []
             }
-        resp = json.dumps(res)
-    if request.method == "POST":
+
+    elif request.method == "POST":
         # 添加弹幕
         data = json.loads(request.get_data())
         msg = {
@@ -294,38 +293,19 @@ def tm():
             "color": data["color"],
             "type": data['type'],
             "ip": request.remote_addr,
-            "_id": datetime.datetime.now().strftime("%Y%m%d%H%M%S") + uuid.uuid4().hex,
+            "_id": datetime.now().strftime("%Y%m%d%H%M%S") + uuid.uuid4().hex,
             "player": [
                 data["player"]
             ]
         }
         res = {
             "code": 1,
-            "data": msg
+            "data": msg,
+            "msg": '发送弹幕成功'
         }
-        resp = json.dumps(res)
         # 将添加的弹幕推入redis的队列中
         rd.lpush("video" + str(data["player"]), json.dumps(msg))
-    return Response(resp, mimetype='application/json')
 
-# GET 404, POST 正常使用
-def get_tm():
-    if request.method == "GET":
-        # 获取弹幕消息队列
-        id = request.args.get('id')
-        # 存放在redis队列中的键值
-        key = "video" + str(id)
-        if rd.llen(key):
-            msgs = rd.lrange(key, 0, 2999)
-            res = {
-                "code": 1,
-                "danmaku": [json.loads(v) for v in msgs]
-            }
-        else:
-            res = {
-                "code": 1,
-                "danmaku": []
-            }
-        resp = json.dumps(res)
+    resp = json.dumps(res)
     return Response(resp, mimetype='application/json')
 

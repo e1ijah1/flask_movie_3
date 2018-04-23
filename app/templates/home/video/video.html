@@ -43,17 +43,15 @@
             <p></p>
 
             <div class="float-right bar">
-                <a href="">
-                <img  class=""
+
+                <img id="like" data-toggle="tooltip" data-placement="bottom"
                      src="{{ url_for('static', filename='web/icons/like.png') }}" alt="赞">
-                </a>&nbsp;
-                {{ video.like }}&nbsp;&nbsp;&nbsp;&nbsp;
-                <img id="collect" {% if current_user not in video.collecters %}title="收藏视频"
-                     {% else %} title="取消收藏" {% endif %}
-                     data-toggle="tooltip" data-placement="bottom"
-                     src="{{ url_for('static', filename='web/icons/collection.png') }}" alt="收藏">
                 &nbsp;
-                {{ video.collecters.count() }}
+                <span id="like-num">{{ video.likers.count() }}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+                <img id="collect" data-toggle="tooltip" data-placement="bottom"
+                     src="{{ url_for('static', filename='web/icons/collection.png') }}" alt="收藏">
+                &nbsp;<span id="collect-num">{{ video.collecters.count() }}</span>
+
             </div>
 
             <!-- JiaThis Button BEGIN -->
@@ -190,7 +188,8 @@
         },
         danmaku: {
             id: '{{ video.id }}',
-            api: '/tm/'
+            //api: '/tm/'
+            api: 'https://api.prprpr.me/dplayer/'
         }
     });
 
@@ -218,48 +217,134 @@
 
 <script>
     $(document).ready(function(){
-        //提示
-        $('[data-toggle="tooltip"]').tooltip();
+
+        $.extend({
+            colRemove: function() {
+                $("#collect").removeClass();
+                //此处不适合用toggleClass
+            },
+            colAdd: function() {
+                $("#collect").addClass("gray");
+            },
+            likeRemove: function() {
+                $('#like').removeClass();
+            },
+            likeAdd: function() {
+                $('#like').addClass('gray');
+            },
+        });
 
         {% if not current_user.is_authenticated %}
-        $('#collect').click(function(){
-            alert('你还没有登录呢, 请先登录!')
-        });
-
-        {% elif current_user not in video.collecters %}
-        $("#collect").addClass("gray");
-        //light
-        $("#collect").mouseover(function(){
-            $("#collect").removeClass();
-            //此处不适合用toggleClass
-        });
-
-        $("#collect").mouseout(function(){
-            $("#collect").addClass("gray");
-        });
-
-        //$("#collect").attr("title", "收藏视频")//延迟
-
-        //ajax请求收藏视频, 从而避免刷新页面
-        $("#collect").click(function(){
-            $("#collect").load("{{ url_for('home.video_collect', id=video.id) }}", function(responseTxt){
-                if(responseTxt=="True")
-                    alert('视频收藏成功');
-                    $("#collect").removeClass();
-
+            $('#collect, #like').click(function(){
+                alert('你还没有登录呢, 请先登录!');
             });
-        });
+            $('#collect, #like').addClass('gray');
+            $("#collect").attr("title", "收藏视频");
+            $("#like").attr("title", "点个赞吧");
         {% else %}
-        //$("#collect").attr("title", "取消收藏")
-        //取消收藏
-        $("#collect").click(function(){
-            $("#collect").load("{{ url_for('home.video_uncollect', id=video.id) }}", function(responseTxt){
-                if(responseTxt=="True")
-                    alert('视频已经从收藏中移除')
-                    $("#collect").addClass("gray");
-            });
-        });
+
+            {% if current_user not in video.collecters %}//收藏
+                $.colAdd();
+                //light
+                $("#collect").mouseover($.colRemove);
+
+                $("#collect").mouseout($.colAdd);
+
+                $("#collect").attr("title", "收藏视频");
+
+                //ajax请求收藏视频, 从而避免刷新页面
+                $("#collect").click(function(){
+                    $("#collect").load("{{ url_for('home.video_collect', id=video.id) }}", function(responseTxt){
+                        var result = responseTxt.split(':');
+                        if(result[0]=="True")
+                            {
+                            var num = responseTxt.split(':')[1];
+                            alert('视频已加入收藏');
+                            $.colRemove();
+                            $('#collect-num').text(num);
+                            //$('#collect').removeAttr('title');
+                            //$('#collect').attr('title', '取消收藏');
+                            }
+                        else
+                            {
+                            alert('请勿重复收藏视频～');
+                            }
+                    });
+                });
+            {% else %}
+                //取消收藏
+
+                $('#collect').attr('title', '取消收藏');
+
+                $("#collect").click(function(){
+                    $("#collect").load("{{ url_for('home.video_uncollect', id=video.id) }}", function(responseTxt){
+                        var result = responseTxt.split(':');
+                        if(result[0]=="True")
+                            {
+                            var num = responseTxt.split(':')[1];
+                            alert('视频已经从收藏中移除');
+                            $.colAdd();
+                            $("#collect").mouseover($.colRemove);
+                            $("#collect").mouseout($.colAdd);
+                            $('#collect-num').text(num);
+                            //$('#collect').removeAttr('title');
+                            //$("#collect").attr("title", "收藏视频");
+                            }
+                        else
+                            {
+                            alert('请勿重复操作~');
+                            }
+                    });
+                });
+            {% endif %}
+
+            {% if current_user not in video.likers %}
+                $("#like").attr("title", "点个赞吧");
+                $.likeAdd();
+                $('#like').mouseover($.likeRemove);
+                $('#like').mouseout($.likeAdd);
+                $('#like').click(function(){
+                    $('#like').load('{{ url_for('home.video_like', id=video.id) }}', function(responseTxt){
+                        var result = responseTxt.split(':');
+                        if (result[0]=='True')
+                            {
+                            var num = responseTxt.split(':')[1];
+                            alert('up主已经收到你的赞啦');
+                            $.likeRemove();
+                            $('#like-num').text(num);
+                            }
+                        else
+                            {
+                            alert('点赞次数太多啦');
+                            }
+                    });
+                });
+            {% else %}
+                $("#like").attr("title", "取消点赞");
+                $('#like').click(function(){
+                    $('#like').load('{{ url_for('home.video_unlike', id=video.id) }}', function(responseTxt){
+                        var result = responseTxt.split(':');
+                        if (result[0]=='True')
+                            {
+                            var num = responseTxt.split(':')[1];
+                            alert('已经取消点赞');
+                            $.likeAdd();
+                            $('#like').mouseover($.likeRemove);
+                            $('#like').mouseout($.likeAdd);
+                            $('#like-num').text(num);
+                            }
+                        else
+                            {
+                            alert('请勿重复操作');
+                            }
+                    });
+                });
+            {% endif %}
+
         {% endif %}
+
+        //提示
+        $('[data-toggle="tooltip"]').tooltip();
 
     });
 </script>

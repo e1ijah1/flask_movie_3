@@ -21,8 +21,7 @@ class VideoTag(db.Model):
                              lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
-        s = '<VideoTag %r>' % self.name
-        return s.decode('unicode-escape')
+        return '<VideoTag %r>' % self.name
 
 ''' #使用多对多模型出现一系列问题??
 # 1. (_mysql_exceptions.IntegrityError) (1215, 'Cannot add foreign key constraint')
@@ -60,7 +59,6 @@ class Video(db.Model):
     url = db.Column(db.String(255), unique=True)
     intro = db.Column(db.Text)
     cover = db.Column(db.Unicode(255), unique=True)
-    like = db.Column(db.BigInteger)
     playnum = db.Column(db.BigInteger)
     tag_id = db.Column(db.Integer, db.ForeignKey('video_tag.id'))
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
@@ -70,6 +68,9 @@ class Video(db.Model):
     collecters = db.relationship('User', secondary=video_collect,
                  backref=db.backref('collect_videos', lazy='dynamic'),
                                  lazy='dynamic', single_parent=True)
+    likers = db.relationship('User', secondary=video_like,
+                             backref=db.backref('like_videos', lazy='dynamic'),
+                             lazy='dynamic', single_parent=True)
     '''
     sqlalchemy.exc.ArgumentError
     sqlalchemy.exc.ArgumentError: On Video.collecters, delete-orphan cascade is not supported on a many-to-many or many-to-one relationship when single_parent is not set.   Set single_parent=True on the relationship().
@@ -97,8 +98,7 @@ class Video(db.Model):
             db.session.rollback()
 
     def __repr__(self):
-        s = '<Video %r>' % self.title
-        return s.decode('unicode-escape')
+        return '<Video %r>' % self.title
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
@@ -127,9 +127,6 @@ class User(db.Model, UserMixin):
                                      primaryjoin='VideoCollect.video_id==Video.id',
                                      lazy='dynamic', cascade='all, delete-orphan')
     '''
-    like_videos = db.relationship('Video', secondary=video_like,
-                                 backref=db.backref('likers', lazy='dynamic'),
-                                 lazy='dynamic', single_parent=True)
     videos = db.relationship('Video', backref='uploader', lazy='dynamic',
                              cascade='all, delete-orphan')
 
@@ -194,6 +191,18 @@ class User(db.Model, UserMixin):
             except:
                 db.session.rollback()
                 return False
+
+    def count_like_num(self):
+        self.get_like_num = 0
+        for video in self.videos:
+            self.get_like_num += video.likers.count()
+        db.session.add(self)
+        try:
+            db.session.commit()
+            return True
+        except:
+            db.session.rollback()
+            return False
 
     @property
     def password(self):
@@ -296,8 +305,7 @@ class User(db.Model, UserMixin):
                                                                      default=default, rating=rating)
 
     def __repr__(self):
-        s = '<User %r>' % self.username
-        return s.decode('unicode-escape')
+        return '<User %r>' % self.username
 
 
 class UserLog(db.Model):
@@ -309,7 +317,7 @@ class UserLog(db.Model):
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
-        return '<UserLog %r>' % self.id
+        return '<UserLog %r>' % self.user.username
 
 class Comment(db.Model):
     __tablename__ = 'comment'
@@ -320,8 +328,7 @@ class Comment(db.Model):
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
-        s = '<Comment %r>' % self.content[:20]
-        return s.decode('unicode-escape')
+        return '<Comment %r>' % self.content[:20]
 
 
 class Admin(db.Model):
@@ -395,8 +402,7 @@ class Admin(db.Model):
         return True
 
     def __repr__(self):
-        s = '<Admin %r>' % self.name
-        return s.decode('unicode-escape')
+        return '<Admin %r>' % self.name
 
 
 class AdminLog(db.Model):
@@ -407,7 +413,7 @@ class AdminLog(db.Model):
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
-        return '<AdminLog %r>' % self.id
+        return '<AdminLog %r>' % self.admin.email
 
 
 class OperationLog(db.Model):
@@ -419,4 +425,4 @@ class OperationLog(db.Model):
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
-        return '<OperationLog %r>' % self.id
+        return '<OperationLog %r>' % self.admin.email

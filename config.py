@@ -41,6 +41,8 @@ class DevelopmentConfig(Config):
 
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://root:toor@localhost:{}/{}?charset=utf8'.format(PORT, DATABASE)
 
+    REDIS_URL = "redis://localhost:6379/0"
+
 class ProductionConfig(Config):
     HOSTNAME = '127.0.0.1'
     PORT = '3306'

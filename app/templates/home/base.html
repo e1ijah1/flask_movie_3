@@ -84,7 +84,7 @@
             {% else %}
             <li class="nav-item">
                 <a class="nav-link active bg-dark"
-                   href="{{ url_for('auth.login') }}">登录</a>
+                   href="{{ url_for('auth.login', next=request.path) }}">登录</a>
             </li>
             {% endif %}
         </ul>
