@@ -59,6 +59,7 @@ class Video(db.Model):
     url = db.Column(db.String(255), unique=True)
     intro = db.Column(db.Text)
     cover = db.Column(db.Unicode(255), unique=True)
+    thumbnail_cover = db.Column(db.Unicode(255), unique=True)
     playnum = db.Column(db.BigInteger)
     tag_id = db.Column(db.Integer, db.ForeignKey('video_tag.id'))
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
@@ -169,7 +170,7 @@ class User(db.Model, UserMixin):
     def like(self, ip, video):
         if video not in self.like_videos:
             self.like_videos.append(video)
-            user_log = UserLog(user=self, ip=ip, info='点赞')
+            user_log = UserLog(user=self, ip=ip, info='点赞['+video.title+']')
             db.session.add(user_log)
             db.session.add(self)
             try:
@@ -182,7 +183,7 @@ class User(db.Model, UserMixin):
     def unlike(self, ip, video):
         if video in self.like_videos:
             self.like_videos.remove(video)
-            user_log = UserLog(user=self, ip=ip, info='取消点赞')
+            user_log = UserLog(user=self, ip=ip, info='取消点赞['+video.title+']')
             db.session.add(user_log)
             db.session.add(self)
             try:
@@ -285,15 +286,17 @@ class User(db.Model, UserMixin):
             db.session.rollback()
             return False
 
-    def ping(self, ip):  # 刷新用户的最后访问时间
-        user_log = UserLog(user_id=self.id, ip=ip, info='点赞')
+    def ping(self):  # 刷新用户的最后访问时间
         self.last_visit = datetime.now()
         db.session.add(self)
-        db.session.add(user_log)
         try:
             db.session.commit()
         except:
             db.session.rollback()
+
+    @property
+    def is_admin(self):
+        return False
 
     def gravatar_hash(self):
         return hashlib.md5(self.email.lower().encode('utf-8')).hexdigest()
@@ -323,6 +326,7 @@ class Comment(db.Model):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
+    disabled = db.Column(db.Boolean)
     video_id = db.Column(db.Integer, db.ForeignKey('video.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
@@ -331,16 +335,17 @@ class Comment(db.Model):
         return '<Comment %r>' % self.content[:20]
 
 
-class Admin(db.Model):
+class Admin(db.Model, UserMixin):
     __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True, index=True)
     email = db.Column(db.String(64), unique=True, index=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     admin_logs = db.relationship('AdminLog', backref='admin', lazy='dynamic')
-    operation_logs = db.relationship('OperationLog', backref='admin',
-                                     lazy='dynamic')
 
+    @property
+    def is_admin(self):
+        return True
 
     @property
     def password(self):
@@ -410,19 +415,9 @@ class AdminLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'))
     ip = db.Column(db.String(128), index=True)
+    info = db.Column(db.Text)
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
         return '<AdminLog %r>' % self.admin.email
 
-
-class OperationLog(db.Model):
-    __tablename__ = 'operation_log'
-    id = db.Column(db.Integer, primary_key=True)
-    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'))
-    ip = db.Column(db.String(128), index=True)
-    info = db.Column(db.Text)
-    add_time = db.Column(db.DateTime, index=True, default=datetime.now)
-
-    def __repr__(self):
-        return '<OperationLog %r>' % self.admin.email

@@ -4,10 +4,10 @@ __author__ = 'F1renze'
 __time__ = '2018/3/21 9:06'
 
 from . import auth
-from flask import request, redirect, url_for, flash, render_template
-from flask_login import current_user
+from flask import request, redirect, url_for, flash, \
+    render_template, abort, current_app
 from app.auth.forms import LoginForm, RegistrationForm, PasswordResetRequestForm, ChangePasswordForm, ChangeEmailForm, PasswordResetForm
-from app.models import User
+from app.models import User, UserLog, Admin, AdminLog
 from flask_login import login_user, login_required, logout_user, current_user
 from app import db, login_manager
 from app.email import send_email
@@ -15,16 +15,20 @@ from app.email import send_email
 # flask-login需要提供一个 user_loader回调
 @login_manager.user_loader
 def load_user(user_id):
+    if Admin.query.get(user_id):
+        return Admin.query.get(user_id)
     return User.query.filter_by(id=user_id).first()
 
 @auth.before_app_request
 def before_request():
-    if current_user.is_authenticated:
-        ip = request.remote_addr
-        current_user.ping(ip)
-    if current_user.is_authenticated and not current_user.confirmed \
-        and request.endpoint[:5] != 'auth.' and request.endpoint != 'static':
+    if current_user.is_authenticated and not current_user.is_admin \
+            and not current_user.confirmed and \
+            request.endpoint[:5] != 'auth.' and request.endpoint != 'static':
         return redirect(url_for('auth.unconfirmed'))
+    elif current_user.is_authenticated and not current_user.is_admin and \
+            request.path[:6] == '/admin':
+        abort(403)
+        return redirect(url_for('home.index'))
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -33,7 +37,16 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
             login_user(user, form.remember_me.data)
-            return redirect(request.args.get('next') or url_for('home.index'))
+            user.ping()
+            user_log = UserLog(user_id=user.id,
+                               ip=request.remote_addr, info='登录')
+            db.session.add(user_log)
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
+            finally:
+                return redirect(request.args.get('next') or url_for('home.index'))
         flash('无效用户名或密码')
     return render_template('auth/login.html', form=form)
 

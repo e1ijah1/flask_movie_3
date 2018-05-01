@@ -24,7 +24,8 @@ manager.add_command('db', MigrateCommand)
 def inject_param():
     search_form = SearchForm()
     site_name = app.config['SITE_NAME']
-    return dict(search_form=search_form, site_name=site_name)
+    admin_index = app.config['ADMIN_INDEX_URL']
+    return dict(search_form=search_form, site_name=site_name, admin_index=admin_index)
 
 
 

@@ -9,12 +9,13 @@ from flask import render_template, flash, current_app, redirect, url_for, reques
 from flask_login import login_required, current_user
 from app.home.forms import VideoUpload, CommentForm, SearchForm, EditProfileForm
 from werkzeug.utils import secure_filename
-from app.models import Video, Comment, User
+from app.models import Video, Comment, User, UserLog
 from app import db
 import os, uuid, stat
 from datetime import datetime
 from app import videos, images
 from PIL import Image
+from app.decorators import admin_required
 
 
 @home.route('/')
@@ -117,17 +118,50 @@ def delete_comment(id):
     except:
         flash('未知错误！请重试或联系管理员')
         db.session.rollback()
-    return redirect(url_for('.video', id=video_id))
+    finally:
+        return redirect(url_for('.video', id=video_id))
+
+@home.route('/comment/disable/<int:id>')
+@admin_required
+def disable_comment(id):
+    comment = Comment.query.get_or_404(id)
+    video_id = comment.video_id
+    comment.disabled = True
+    db.session.add(comment)
+    try:
+        db.session.commit()
+        flash('已经屏蔽此评论')
+    except:
+        flash('未知错误！')
+        db.session.rollback()
+    finally:
+        return redirect(url_for('.video', id=video_id))
+
+@home.route('/comment/enable/<int:id>')
+@admin_required
+def enable_comment(id):
+    comment = Comment.query.get_or_404(id)
+    video_id = comment.video_id
+    comment.disabled = False
+    db.session.add(comment)
+    try:
+        db.session.commit()
+        flash('已经恢复此评论')
+    except:
+        flash('未知错误！')
+        db.session.rollback()
+    finally:
+        return redirect(url_for('.video', id=video_id))
 
 #视频收藏
 @home.route('/video/collect/<int:id>')
 def video_collect(id):
     video = Video.query.get_or_404(id)
     if current_user.collect(video):
-            # flash('视频收藏成功')
+        # flash('视频收藏成功')
         return 'True:'+str(video.collecters.count())
     else:
-            # flash('额, 发生未知错误, 请重试')
+        # flash('额, 发生未知错误, 请重试')
         return 'False:'+str(video.collecters.count())
 
 @home.route('/video/uncollect/<int:id>')

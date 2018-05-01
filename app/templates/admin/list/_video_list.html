@@ -1,0 +1,16 @@
+{% extends 'admin/model/list.html' %}
+{% import 'admin/model/layout.html' as model_layout with context %}
+
+{% macro render_intro(model, column) %}
+    {{ model.intro | safe }}
+{% endmacro %}
+
+{% macro render_video_tag(model, column) %}
+    {% if model.video_tag %}
+    {{ model.video_tag }}
+    {% else %}
+    暂未添加标签
+    {% endif %}
+{% endmacro %}
+
+

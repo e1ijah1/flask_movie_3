@@ -5,7 +5,7 @@
         <a class="page-link"
            href="{% if pagination.has_prev %}{{ url_for(endpoint, page=pagination.page - 1, **kwargs) }}
         {{ fragment }}{% else %}#{% endif %}">
-            Previous
+            上一页
         </a>
     </li>
 
@@ -35,7 +35,7 @@
         <a class="page-link"
            href="{% if pagination.has_next %}{{ url_for(endpoint, page=pagination.page + 1, **kwargs) }}
         {{ fragment }}{% else %}#{% endif %}">
-            Next
+            下一页
         </a>
     </li>
 </ul>

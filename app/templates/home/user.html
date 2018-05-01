@@ -146,7 +146,11 @@
                                 </div>
 
                                 <div class="comment-body">
+                                    {% if comment.disabled %}
+                                    <p>此评论因言论不当已被屏蔽</p>
+                                    {% else %}
                                     <p>{{ comment.content | safe }}</p>
+                                    {% endif %}
                                 </div>
                             </div>
                         </li>

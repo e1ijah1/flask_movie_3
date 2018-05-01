@@ -12,12 +12,14 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_cl
 from flask_moment import Moment
 from flask_redis import FlaskRedis
 from flask_admin import Admin
+from flask_babelex import Babel
 
 db = SQLAlchemy()
 mail=Mail()
 moment = Moment()
 rd = FlaskRedis()
-f_admin = Admin(name='后台管理', template_mode='bootstrap3')
+f_admin = Admin(name='后台管理', template_mode='bootstrap3', base_template='admin/mybase.html')
+babel = Babel()
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -34,7 +36,9 @@ def create_app(configname):
     mail.init_app(app)
     moment.init_app(app)
     rd.init_app(app)
+    f_admin.index_view.url = app.config['ADMIN_INDEX_URL']
     f_admin.init_app(app)
+    babel.init_app(app)
 
     # flask-upload
     configure_uploads(app, (videos, images))

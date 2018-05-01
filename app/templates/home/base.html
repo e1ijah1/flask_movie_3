@@ -61,8 +61,17 @@
             <!--</li>-->
             <!--endif %}-->
 
-            {% if current_user.is_authenticated %}
-
+            {% if current_user.is_authenticated and current_user.is_admin %}
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbardrop">
+                    <b class="caret">管理员: {{ current_user.name }}</b>
+                </a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="{{ admin_index }}">回到后台</a>
+                    <a class="dropdown-item active bg-dark" href="{{ url_for('sec.admin_logout') }}">管理员登出</a>
+                </div>
+            </li>
+            {% elif current_user.is_authenticated %}
             <li class="nav-item">
                 <a class="nav-link active bg-primary"
                    href="{{ url_for('home.upload') }}">上传视频</a>

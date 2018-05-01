@@ -16,10 +16,23 @@
             </div>
 
             <div class="comment-body">
+                {% if comment.disabled and current_user.is_admin %}
+                <p>此评论因言论不当已被屏蔽</p>
+                <p><i>{{ comment.content | safe }}</i></p>
+                {% elif comment.disabled %}
+                <p>此评论因言论不当已被屏蔽</p>
+                {% else %}
                 <p>{{ comment.content | safe }}</p>
+                {% endif %}
                 {% if comment.author == current_user %}
                 <a href="{{ url_for('home.delete_comment', id=comment.id) }}"
                    class="btn btn-outline-danger float-right">删除评论</a>
+                {% elif current_user.is_admin and comment.disabled %}
+                <a href="{{ url_for('home.enable_comment', id=comment.id) }}"
+                   class="btn btn-outline-danger float-right">恢复评论 [管理员]</a>
+                {% elif current_user.is_admin %}
+                <a href="{{ url_for('home.disable_comment', id=comment.id) }}"
+                   class="btn btn-outline-danger float-right">屏蔽评论 [管理员]</a>
                 {% endif %}
             </div>
         </div>

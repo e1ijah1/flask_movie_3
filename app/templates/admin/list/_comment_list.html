@@ -1,0 +1,7 @@
+{% extends 'admin/model/list.html' %}
+{% import 'admin/model/layout.html' as model_layout with context %}
+
+{% macro render_content(model, column) %}
+    {{ model.content | safe | truncate(20, True) }}
+{% endmacro %}
+

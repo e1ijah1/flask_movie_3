@@ -42,6 +42,7 @@
             <div id="dplayer"></div>
             <p></p>
 
+            {% if current_user.is_authenticated and not current_user.is_admin %}
             <div class="float-right bar">
 
                 <img id="like" data-toggle="tooltip" data-placement="bottom"
@@ -53,21 +54,13 @@
                 &nbsp;<span id="collect-num">{{ video.collecters.count() }}</span>
 
             </div>
+            {% endif %}
 
-            <!-- JiaThis Button BEGIN -->
-            <div class="jiathis_style_24x24">
-                <a class="jiathis_button_copy"></a>
-                <a class="jiathis_button_weixin"></a>
-                <a class="jiathis_button_qzone"></a>
-                <a class="jiathis_button_cqq"></a>
-                <a class="jiathis_button_tsina"></a>
-                <a class="jiathis_button_douban"></a>
-                <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis"
-                   target="_blank"></a>
-                <a class="jiathis_counter_style"></a>
-            </div>
-            <script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
-            <!-- JiaThis Button END -->
+            <!--baidu-->
+            <div class="bdsharebuttonbox"><a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_more" data-cmd="more"></a></div>
+            <script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"32"},"share":{},"image":{"viewList":["copy","weixin","sqq","tsina","qzone"],"viewText":"分享到：","viewSize":"16"},"selectShare":{"bdContainerClass":null,"bdSelectMiniList":["copy","weixin","sqq","tsina","qzone"]}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+            <!--end-->
+
         </div>
         <div class="col-md-4">
             <div class="card">
@@ -129,6 +122,10 @@
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
                         <strong>请先<a href="{{ url_for('auth.login', next=request.path) }}"
                                      class="text-info">登录</a>，才可参与评论！</strong>
+                    </div>
+                    {% elif current_user.is_admin %}
+                    <div class="alert alert-info alert-dismissible text-center" role="alert">
+                        <strong>管理员视角</strong>
                     </div>
                     {% else %}
                     <form class="form-signin" action="{{ url_for('home.video', id=video.id) }}" method="POST">

@@ -1,0 +1,50 @@
+{% extends 'admin/model/list.html' %}
+{% import 'admin/model/layout.html' as model_layout with context %}
+
+{% macro render_info(model, column) %}
+    {% if model.info %}
+    {{ model.info | safe }}
+    {% else %}
+    未填写
+    {% endif %}
+{% endmacro %}
+
+{% macro render_head_img(model, column) %}
+    {% if model.head_img %}
+    已上传
+    {% else %}
+    未更改
+    {% endif %}
+{% endmacro %}
+
+{% macro render_phone(model, column) %}
+    {% if model.phone %}
+    {{ model.phone }}
+    {% else %}
+    未填写
+    {% endif %}
+{% endmacro %}
+
+{% macro render_location(model, column) %}
+    {% if model.location %}
+    {{ model.location }}
+    {% else %}
+    未填写
+    {% endif %}
+{% endmacro %}
+
+{% macro render_get_like_num(model, column) %}
+    {% if model.get_like_num != None %}
+    {{ model.get_like_num }}
+    {% else %}
+    账户未确认
+    {% endif %}
+{% endmacro %}
+
+{% macro render_confirmed(model, column) %}
+    {% if model.confirmed %}
+    已确认
+    {% else %}
+    未确认
+    {% endif %}
+{% endmacro %}
