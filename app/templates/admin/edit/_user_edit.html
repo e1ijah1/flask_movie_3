@@ -1,0 +1,23 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block tail %}
+{{ super() }}
+<script type="text/javascript"
+        src="{{ url_for('static', filename='plugin/ueditor-1.4.3.3/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8"
+        src="{{ url_for('static', filename='plugin/ueditor/ueditor.config.js') }}"></script>
+<script type="text/javascript" charset="utf-8"
+        src="{{ url_for('static', filename='plugin/ueditor/ueditor.all.min.js') }}"></script>
+<script type="text/javascript" charset="utf-8"
+        src="{{ url_for('static', filename='plugin/ueditor/lang/zh-cn/zh-cn.js') }}"></script>
+<script>
+        UE.getEditor('ue', {
+            toolbars: [
+                ['undo', 'redo', 'emotion', 'bold', 'spechars', 'forecolor', 'fontsize',
+                'strikethrough', 'link', 'removeformat', 'preview', 'fullscreen',]
+            ],
+            initialFrameWidth: "100%",
+            initialFrameHeight: "100",
+        });
+</script>
+{% endblock %}

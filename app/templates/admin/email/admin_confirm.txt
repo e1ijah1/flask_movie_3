@@ -1,0 +1,22 @@
+管理员 {{ admin.name }}, 您好:
+
+    您已成为 {{ site_name }} 管理员,
+
+    请点击如下链接, 以完成您邮箱的绑定:
+
+    {{ url_for('admin.confirm_view', token=token, _external=True) }}
+
+    (如果不能点击该链接地址, 请复制并粘贴到浏览器的地址输入框)
+
+    备注 : 无需回复此邮件.
+
+                                                            来自 : F1renze
+
+                                                            站点 : {{ site_name }}
+
+                                                            {{ dt.strftime('%Y年%m月%d日') }}
+
+
+
+
+

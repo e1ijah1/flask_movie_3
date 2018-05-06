@@ -340,6 +340,7 @@ class Admin(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True, index=True)
     email = db.Column(db.String(64), unique=True, index=True, nullable=False)
+    confirmed = db.Column(db.Boolean, default=False)
     password_hash = db.Column(db.String(128), nullable=False)
     admin_logs = db.relationship('AdminLog', backref='admin', lazy='dynamic')
 
@@ -358,6 +359,26 @@ class Admin(db.Model, UserMixin):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def generate_confirmation_token(self, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'confirm': self.id})
+
+    def confirm(self, token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return False
+        if data.get('confirm') != self.id:
+            return False
+        self.confirmed = True
+        db.session.add(self)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+        return True
+
     def generate_reset_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
         return s.dumps({'reset': self.id}).decode('utf-8')
@@ -369,11 +390,11 @@ class Admin(db.Model, UserMixin):
             data = s.loads(token.encode('utf-8'))
         except:
             return False
-        user = User.query.get(data.get('reset'))
-        if user is None:
+        admin = Admin.query.get(data.get('reset'))
+        if admin is None:
             return False
-        user.password = new_password
-        db.session.add(user)
+        admin.password = new_password
+        db.session.add(admin)
         try:
             db.session.commit()
         except:
@@ -398,7 +419,6 @@ class Admin(db.Model, UserMixin):
         if self.query.filter_by(email=new_email).first() is not None:
             return False
         self.email = new_email
-        self.avatar_hash = self.gravatar_hash()
         db.session.add(self)
         try:
             db.session.commit()

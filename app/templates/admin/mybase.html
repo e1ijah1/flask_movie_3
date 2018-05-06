@@ -40,8 +40,6 @@
         body {
             padding-top: 4px;
         }
-
-
     </style>
     {% endblock %}
     {% block head %}
@@ -66,28 +64,31 @@
         <!-- /.navbar-header -->
 
         <ul class="nav navbar-top-links navbar-right">
-            <!--<li class="dropdown">-->
-            <!--<a class="dropdown-toggle" data-toggle="dropdown" href="#">-->
-            <!--<i class="fa fa-envelope fa-fw"></i> <i class="fa fa-caret-down"></i>-->
-            <!--</a>-->
-            <!--<ul class="dropdown-menu dropdown-messages">-->
-            <!---->
-            <!--<li class="divider"></li>-->
-            <!--<li>-->
-            <!--<a href="#">-->
-            <!--<div>-->
-            <!--<strong>John Smith</strong>-->
-            <!--<span class="pull-right text-muted">-->
+
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="fa fa-envelope fa-fw"></i> <i class="fa fa-caret-down"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-messages">
+
+                    <!--<li class="divider"></li>-->
+                    <li style="text-align:center;">
+                        <span>此功能暂未开放</span>
+                        <!--<a href="#">-->
+                            <!--<div>-->
+                                <!--<strong>John Smith</strong>-->
+                                <!--<span class="pull-right text-muted">-->
             <!--<em>Yesterday</em>-->
             <!--</span>-->
-            <!--</div>-->
-            <!--<div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>-->
-            <!--</a>-->
-            <!--</li>-->
-            <!--</ul>-->
-            <!--&lt;!&ndash; /.dropdown-messages &ndash;&gt;-->
-            <!--</li>-->
+                            <!--</div>-->
+                            <!--<div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eleifend...</div>-->
+                        <!--</a>-->
+                    </li>
+                </ul>
+                <!--&lt;!&ndash; /.dropdown-messages &ndash;&gt;-->
+            </li>
             <!-- /.dropdown -->
+            <!--拓展功能-->
             <!--<li class="dropdown">-->
             <!--<a class="dropdown-toggle" data-toggle="dropdown" href="#">-->
             <!--<i class="fa fa-tasks fa-fw"></i> <i class="fa fa-caret-down"> 拓展功能</i>-->
@@ -129,44 +130,106 @@
             <!--<li class="divider"></li>-->
 
             <!--</ul>-->
-            <!-- /.dropdown-tasks -->
+            <!--&lt;!&ndash;/.dropdown-tasks&ndash;&gt;-->
             <!--</li>-->
-            <!-- /.dropdown -->
-            <!--<li class="dropdown">-->
-            <!--<a class="dropdown-toggle" data-toggle="dropdown" href="#">-->
-            <!--<i class="fa fa-bell fa-fw"></i> <i class="fa fa-caret-down"></i>-->
-            <!--</a>-->
-            <!--<ul class="dropdown-menu dropdown-alerts">-->
-            <!--<li>-->
-            <!--<a href="#">-->
-            <!--<div>-->
-            <!--<i class="fa fa-comment fa-fw"></i> New Comment-->
-            <!--<span class="pull-right text-muted small">4 minutes ago</span>-->
-            <!--</div>-->
-            <!--</a>-->
-            <!--</li>-->
-            <!--<li class="divider"></li>-->
-            <!--</ul>-->
-            <!--&lt;!&ndash; /.dropdown-alerts &ndash;&gt;-->
-            <!--</li>-->
+            <!--拓展功能　end-->
+
+            <!--/.dropdown-->
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    {% if current_user.confirmed %}
+                    <i class="fa fa-bell fa-fw"></i>
+                    <i class="fa fa-caret-down"></i>
+                    {% else %}
+                    <i class="fa fa-bell fa-fw" style="color:red;"></i>
+                    <i class="fa fa-caret-down" style="color:red;"></i>
+                    {% endif %}
+                </a>
+                <ul class="dropdown-menu dropdown-alerts">
+                    {% if not current_user.is_authenticated %}
+                    <li style="text-align:center;">
+                        你还没有登录!
+                    </li>
+                    {% else %}
+                        {% if current_user.confirmed  %}
+                        <li style="text-align:center;">
+                            暂时没有消息
+                        </li>
+                        {% else %}
+                        <li>
+                            <a href="#">
+                                <div>
+                                    <i class="fa fa-warning fa-fw" style="color:red"></i>
+                                    账户邮箱未确认！
+                                    <span class="pull-right text-muted small">
+                                        {% if current_user.admin_logs %}
+                                        {{ moment(current_user.admin_logs[-1].add_time).fromNow().format('L') }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                    <!--<li class="divider"></li>-->
+                </ul>
+                <!--&lt;!&ndash; /.dropdown-alerts &ndash;&gt;-->
+            </li>
             <!-- /.dropdown -->
             <li class="dropdown">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                     <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-user">
-                    <li><a href="{{ url_for('home.user', username=current_user.username) }}"><i
-                            class="fa fa-user fa-fw"></i> User Profile</a>
-                    </li>
-                    <!--<li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>-->
-                    </li>
-                    <li class="divider"></li>
+                    <!--<li><a href="{{ url_for('home.user', username=current_user.username) }}"><i-->
+                    <!--class="fa fa-user fa-fw"></i> User Profile</a>-->
+                    <!--</li>-->
+                    <!--&lt;!&ndash;<li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>&ndash;&gt;-->
+                    <!--</li>-->
+                    <!--<li class="divider"></li>-->
                     {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('sec.admin_logout') }}"><i class="fa fa-sign-out fa-fw"></i> Log Out</a>
-                        {% else %}
-                    <li><a href="{{ url_for('sec.admin_login') }}"><i class="fa fa-sign-out fa-fw"></i> Log In</a>
-                        {% endif %}
+                    <li>
+                        <a>
+                            <i class="fa fa-user fa-fw"></i>&nbsp;
+                            <b>{{ current_user.name }}</b>
+                        </a>
                     </li>
+                    {% if not current_user.confirmed %}
+                    <li class="bg-danger">
+                        <a id="confirm" href="#">
+                            <i class="fa fa-check-circle-o fa-fw" style="color:red;"></i>
+                            <span style="color:red;">激活账户邮箱</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li>
+                        <a href="{{ url_for('admin.change_email_request') }}">
+                            <i class="fa fa-envelope-o fa-fw"></i>
+                            更改账户邮箱
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url_for('admin.change_password_view') }}">
+                            <i class="fa fa-key fa-fw"></i>
+                            更改密码
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url_for('admin.logout_view') }}">
+                            <i class="fa fa-sign-out fa-fw"></i>
+                            &nbsp;登出
+                        </a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{{ url_for('admin.login_view') }}">
+                            <i class="fa fa-sign-out fa-fw"></i>
+                            登入
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
                 <!-- /.dropdown-user -->
             </li>
@@ -179,7 +242,7 @@
                 <ul class="nav" id="side-menu">
                     <li class="sidebar-search">
                         <div class="input-group custom-search-form">
-                            <input type="text" class="form-control" placeholder="Search...">
+                            <input type="text" class="form-control" placeholder="暂时不支持">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button">
                                     <i class="fa fa-search"></i>
@@ -242,6 +305,27 @@
 <!-- Custom Theme JavaScript -->
 <script src="{{ url_for('static',filename='admin/dist/js/sb-admin-2.js') }}"></script>
 <script src="{{ url_for('static',filename='admin/vendor/metisMenu/metisMenu.min.js') }}"></script>
+{{ moment.include_moment() }}
+{{ moment.lang("zh-CN") }}
+
+{% if not current_user.confirmed %}
+<script>
+    $(document).ready(function(){
+        $('#confirm').click(function(){
+            $('#confirm').load("{{ url_for('admin.email_confirm_view') }}", function(responseTxt){
+                if (responseTxt == 'True')
+                    {
+                    alert('激活邮件已经发送, 请检查你的邮箱');
+                    }
+                else
+                    {
+                    alert('内部错误, 邮件发送失败, 请联系开发者或重试');
+                    }
+            })
+        })
+    })
+</script>
+{% endif %}
 
 {% if admin_view.extra_js %}
 {% for js_url in admin_view.extra_js %}

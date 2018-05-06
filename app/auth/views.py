@@ -5,9 +5,9 @@ __time__ = '2018/3/21 9:06'
 
 from . import auth
 from flask import request, redirect, url_for, flash, \
-    render_template, abort, current_app
+    render_template, abort
 from app.auth.forms import LoginForm, RegistrationForm, PasswordResetRequestForm, ChangePasswordForm, ChangeEmailForm, PasswordResetForm
-from app.models import User, UserLog, Admin, AdminLog
+from app.models import User, UserLog, Admin
 from flask_login import login_user, login_required, logout_user, current_user
 from app import db, login_manager
 from app.email import send_email
@@ -69,7 +69,7 @@ def register():
         except:
             db.session.rollback()
         token = user.generate_confirmation_token()
-        send_email(user.email, '确认你的账户', 'auth/email/confirm',
+        send_email(user.email, '确认账户', 'auth/email/confirm',
                   user=user, token=token)
         flash('一封确认邮件已经发送, 请检查你的邮箱')
         return redirect(url_for('auth.login'))
@@ -98,7 +98,7 @@ def confirm(token):
 @login_required
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
-    send_email(current_user.email, 'Confirm Your Account', 'auth/email/confirm', user=current_user, token=token)
+    send_email(current_user.email, '确认账户', 'auth/email/confirm', user=current_user, token=token)
     flash('一封新的确认邮件已经发送, 请检查你的邮箱')
     return redirect(url_for('home.index'))
 
@@ -129,7 +129,7 @@ def password_reset_request():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
             token = user.generate_reset_token()
-            send_email(user.email, 'Reset Your Password', 'auth/email/reset_password',
+            send_email(user.email, '重置密码', 'auth/email/reset_password',
                       user=user, token=token, next=request.args.get('next'))
             flash('重置密码邮件已经发送!')
             return redirect(url_for('auth.login'))
@@ -157,7 +157,7 @@ def change_email_request():
         if current_user.verify_password(form.password.data):
             new_email = form.email.data
             token = current_user.generate_email_change_token(new_email)
-            send_email(new_email, 'Confirm your email address', 'auth/email/change_email',
+            send_email(new_email, '确认新邮箱地址', 'auth/email/change_email',
                        user=current_user, token=token)
             flash('确认邮箱地址的邮件已经发送, 请检查收件箱')
             return redirect(url_for('home.index'))

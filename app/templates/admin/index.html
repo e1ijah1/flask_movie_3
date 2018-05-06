@@ -1,20 +1,28 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
+{% if current_user.is_authenticated %}
+<div class="container text-center">
+    <h1>欢迎, 管理员 [{{ current_user.name }}] </h1>
+    <a href="{{ url_for('home.index') }}">回到首页</a>
+</div>
+{% else %}
+<div class="container text-center">
+   <a href="{{ url_for('admin.login_view') }}">
+       <h1>身份过期, 请重新登录!</h1>
+   </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block tail_js %}
+{{ super() }}
 <script>
  window.onload = function()
  {
-     if ('{{ current_user.is_authenticated and current_user.is_admin }}' == 'False') {
-         window.location.href = "{{ url_for('sec.admin_login') }}"
+     if ('{{ current_user.is_admin and current_user.is_authenticated }}' == 'False') {
+         window.location.href = "{{ url_for('admin.login_view') }}"
      }
  }
-
 </script>
-
-{% if current_user.is_authenticated %}
-  <p>Hello world</p>
-<a href="{{ url_for('home.index') }}">回到首页</a>
-{% else %}
- <a href="/admin/login">身份过期, 请重新登录!</a>
-{% endif %}
 {% endblock %}

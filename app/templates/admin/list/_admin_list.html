@@ -1,0 +1,10 @@
+{% extends 'admin/model/list.html' %}
+{% import 'admin/model/layout.html' as model_layout with context %}
+
+{% macro render_confirmed(model, column) %}
+    {% if model.confirmed %}
+    邮箱已确认
+    {% else %}
+    <b style="color:red;">邮箱未确认, 不支持重置密码！</b>
+    {% endif %}
+{% endmacro %}

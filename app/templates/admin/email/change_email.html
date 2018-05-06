@@ -1,0 +1,19 @@
+<p>您好,&nbsp;管理员&nbsp;<b>{{ admin.name }}</b>,</p>
+
+<p style="text-indent:2em">您收到这封电子邮件是因为您 (也可能是某人冒充您的名义) 申请了一个更改账户邮箱的请求.</p>
+
+<p style="text-indent:2em"><b>您可以点击如下链接以完成新邮箱的绑定, 如果点击无效, 请把下面的地址拷贝到浏览器的地址栏中:</b></p>
+
+<p style="text-indent:2em"><a href="{{ url_for('admin.change_email_view', token=token, _external=True) }}">
+    点击此处打开链接地址, 如不能点击请复制并粘贴到浏览器的地址输入框
+</a></p>
+
+<p style="text-indent:2em">在访问链接之后, 您的账户邮箱将被更改.</p>
+
+<p style="text-indent:2em"><small>备注 : 请不要直接回复本邮件.</small></p>
+
+<p style="text-indent:30em">来自 : F1renze</p>
+
+<p style="text-indent:30em">站点 : {{ site_name }}</p>
+
+<p style="text-indent:30em">{{ dt.strftime('%Y年%m月%d日') }}</p>

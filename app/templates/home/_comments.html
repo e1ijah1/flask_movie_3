@@ -18,6 +18,7 @@
             <div class="comment-body">
                 {% if comment.disabled and current_user.is_admin %}
                 <p>此评论因言论不当已被屏蔽</p>
+                <hr>
                 <p><i>{{ comment.content | safe }}</i></p>
                 {% elif comment.disabled %}
                 <p>此评论因言论不当已被屏蔽</p>

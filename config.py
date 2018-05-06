@@ -7,7 +7,7 @@ import os
 
 
 class Config:
-    ADMIN_INDEX_URL = '/power'
+    # ADMIN_INDEX_URL = '/power'
     BABEL_DEFAULT_LOCALE = 'zh_Hans_CN'
     SITE_NAME = 'CiliCili Video'
     VIDEO_COMMENTS_PER_PAGE = 5

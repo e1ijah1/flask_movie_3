@@ -67,8 +67,8 @@
                     <b class="caret">管理员: {{ current_user.name }}</b>
                 </a>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item" href="{{ admin_index }}">回到后台</a>
-                    <a class="dropdown-item active bg-dark" href="{{ url_for('sec.admin_logout') }}">管理员登出</a>
+                    <a class="dropdown-item" href="{{ url_for('admin.index') }}">回到后台</a>
+                    <a class="dropdown-item active bg-dark" href="{{ url_for('admin.logout_view') }}">管理员登出</a>
                 </div>
             </li>
             {% elif current_user.is_authenticated %}

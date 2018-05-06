@@ -2,28 +2,21 @@
 
 {% block form %}
 <div class="container">
-    <form class="form-signin" action="{{ url_for('sec.admin_login') }}"
+    <form class="form-signin" action="{{ url_for('admin.login_view') }}"
           method="POST">
         {{ form.hidden_tag() }}
-
-        <h2 class="form-signin-heading">后台登录</h2>
-        <br>
-        <!--<label for="inputEmail" class="sr-only">邮箱</label>-->
+        <h1 class="form-signin-heading text-center">后台登录</h1>
+        <hr>
         {{ form.name.label(for='inputName', class='sr-only') }}
         {{ form.name(class='form-control', id='inputName', placeholder="管理员账户", required=True) }}
-        <!--<input type="email" id="inputEmail" class="form-control" placeholder="邮箱地址" required autofocus>-->
-        <!--<label for="inputPassword" class="sr-only">密码</label>-->
         {{ form.password.label(for='inputPassword', class='sr-only') }}
         {{ form.password(type='password', id='inputPassword', class='form-control', placeholder='密码', required=True) }}
-        <!--<input type="password" id="inputPassword" class="form-control" placeholder="密码" required>-->
         <div class="checkbox">
             <p>
-                忘记密码? <a href="{{ url_for('auth.password_reset_request') }}">点此重置密码</a>
+                忘记密码? <a href="{{ url_for('admin.password_reset_request') }}">点此重置密码</a>
             </p>
         </div>
-
         {{ form.login(class='btn btn-lg btn-primary btn-block', type='submit') }}
-        <!--<button class="btn btn-lg btn-primary btn-block" type="submit">登录</button>-->
     </form>
 
 </div>

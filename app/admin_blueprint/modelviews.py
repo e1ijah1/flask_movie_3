@@ -5,25 +5,39 @@ __time__ = '18-4-23 下午10:07'
 
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
-from flask import redirect, url_for, request, current_app
+from flask import redirect, url_for, current_app, flash
 from flask_admin.model.template import macro
 from jinja2 import Markup
 from PIL import Image
+from .forms import TagForm, VideoForm, UserForm, AdminForm
+from app import db
+from app.models import Admin, Video, User
 import os
 
 class BaseModelView(ModelView):
 
     def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('sec.admin_login'))
+        return redirect(url_for('admin.login_view'))
 
     def is_accessible(self):
         return current_user.is_authenticated
 
+class TagModelView(BaseModelView):
+    # pass
+    form = TagForm
+
+    column_labels = {
+        'name': '标签名',
+        'add_time': '添加时间'
+    }
 
 class UserModelView(BaseModelView):
     can_create = False
 
+    form = UserForm
+
     list_template = 'admin/list/_user_list.html'
+    edit_template = 'admin/edit/_user_edit.html'
 
     def _list_thumb_head_img(view, context, model, name):
         if not model.thumb_head_img:
@@ -58,6 +72,14 @@ class UserModelView(BaseModelView):
     column_exclude_list = ['password_hash', 'avatar_hash']
 
 class VideoModelView(BaseModelView):
+    form = VideoForm
+
+    edit_template = 'admin/edit/_video_edit.html'
+
+    # form_overrides = {
+    #     'intro': CKTextAreaField
+    # }
+
     can_create = False
 
     list_template = 'admin/list/_video_list.html'
@@ -99,6 +121,7 @@ class VideoModelView(BaseModelView):
 
 class CommentModelView(BaseModelView):
     can_create = False
+    can_edit = False
 
     list_template = 'admin/list/_comment_list.html'
 
@@ -123,11 +146,36 @@ class CommentModelView(BaseModelView):
     column_list = ('content', 'author', 'video', 'add_time', 'disabled')
 
 class AdminModelView(BaseModelView):
+    can_edit = False
+
+    form = AdminForm
+
+    def on_model_change(self, form, model, is_created):
+        if is_created and form.validate_on_submit():
+            admin = Admin(name=form.name.data,
+                          email=form.email.data,
+                          password=form.password.data)
+            db.session.add(admin)
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
 
     column_exclude_list = ['password_hash']
 
+    column_labels = {
+        'name': '账户名',
+        'email': '账户邮箱',
+        'confirmed': '确认邮箱'
+    }
+
+    list_template = 'admin/list/_admin_list.html'
+
+    column_formatters = dict(confirmed=macro('render_confirmed'))
+
 class UserLogModelView(BaseModelView):
     can_create = False
+    can_edit = False
 
     column_list = ('info', 'user', 'ip', 'add_time')
 
@@ -146,3 +194,19 @@ class UserLogModelView(BaseModelView):
 
 class AdminLogModelView(BaseModelView):
     can_create = False
+    can_edit = False
+    can_delete = False
+
+    column_list = ('info', 'admin', 'ip', 'add_time')
+
+    column_labels = {
+        'info': '日志摘要',
+        'admin': '管理员',
+        'ip': 'IP地址',
+        'add_time': '时间'
+    }
+
+    def _list_admin(view, context, model, name):
+        return Markup('<b>%s</b>' % model.admin.name)
+
+    column_formatters = dict(admin=_list_admin)
