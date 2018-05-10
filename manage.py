@@ -5,7 +5,7 @@ __time__ = '2018/3/18 13:53'
 
 import os
 from app import create_app, db
-from app.models import User
+from app.models import Admin, VideoTag
 from flask_script import Manager, Shell
 from flask_migrate import Migrate, MigrateCommand
 from app.home.forms import SearchForm
@@ -26,8 +26,6 @@ def inject_param():
     site_name = app.config['SITE_NAME']
     # admin_index = app.config['ADMIN_INDEX_URL']
     return dict(search_form=search_form, site_name=site_name)
-
-
 
 if __name__ == '__main__':
     manager.run()

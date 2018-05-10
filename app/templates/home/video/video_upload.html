@@ -24,6 +24,10 @@
             {{ form.title.label(for='title') }}
             {{ form.title(class='form-control', id='title', placeholder='输入视频标题') }}
         </div>
+        <div class="form-group">
+            {{ form.tag.label(for='tag') }}
+            {{ form.tag(class='form-control', id='tag') }}
+        </div>
         <div class="'form-group">
         {{ form.video.label(for='video') }}
         {{ form.video(class='form-control', id='video') }}
@@ -37,6 +41,7 @@
             {{ form.cover.label(for='cover') }}
             {{ form.cover(class='form-control', id='cover') }}
         </div>
+
         {{ form.submit() }}
     </form>
 </div>

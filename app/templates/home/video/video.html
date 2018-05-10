@@ -38,6 +38,24 @@
 {% block content %}
 <div class="container">
     <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('home.index') }}">首页</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('home.show_tag', tagname=video.video_tag.name) }}">
+                            {{ video.video_tag.name }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        {{ video.title }}
+                    </li>
+                </ol>
+            </nav>
+        </div>
+
         <div class="col-md-8">
             <div id="dplayer"></div>
             <p></p>
@@ -70,10 +88,6 @@
                 <div class="card-body">
                     <table class="table table-striped">
                         <tr>
-                            <th style="color:#ccc;font-weight:bold;">标题</th>
-                            <th>{{ video.title }}</th>
-                        </tr>
-                        <tr>
                             <td style="color:#ccc;font-weight:bold;">上传者</td>
                             <td>
                                 <a href="{{ url_for('home.user', username=video.uploader.username) }}">
@@ -101,7 +115,7 @@
                         </tr>
                     </table>
                 </div>
-                <div class="card-footer" style="height:130px;overflow:scroll;">
+                <div class="card-footer" style="height:160px;overflow:scroll;">
                     <h3>视频简介:</h3>
                     <p>{{ video.intro | safe }}</p>
                 </div>
@@ -185,11 +199,10 @@
         },
         danmaku: {
             id: '{{ video.id }}',
-            //api: '/tm/'
-            api: 'https://api.prprpr.me/dplayer/'
+            api: '/danmu/'
+            //api: 'https://api.prprpr.me/dplayer/'
         }
     });
-
 </script>
 
 <script type="text/javascript"

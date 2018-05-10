@@ -12,12 +12,19 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_cl
 from flask_moment import Moment
 from flask_redis import FlaskRedis
 from flask_babelex import Babel
+from flask_cache import Cache
 
 db = SQLAlchemy()
 mail=Mail()
 moment = Moment()
 rd = FlaskRedis()
 babel = Babel()
+cache = Cache(config={
+    'CACHE_TYPE': 'redis',
+    'CACHE_REDIS_HOST': '127.0.0.1',
+    'CACHE_REDIS_PORT': 6379,
+    'CACHE_REDIS_DB': 2
+})
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -37,6 +44,7 @@ def create_app(configname):
     from app.admin_blueprint import f_admin
     f_admin.init_app(app)
     babel.init_app(app)
+    cache.init_app(app)
 
     # flask-upload
     configure_uploads(app, (videos, images))

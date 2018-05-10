@@ -5,7 +5,7 @@ __time__ = '2018/3/21 9:06'
 
 from . import auth
 from flask import request, redirect, url_for, flash, \
-    render_template, abort
+    render_template, abort, session
 from app.auth.forms import LoginForm, RegistrationForm, PasswordResetRequestForm, ChangePasswordForm, ChangeEmailForm, PasswordResetForm
 from app.models import User, UserLog, Admin
 from flask_login import login_user, login_required, logout_user, current_user
@@ -15,9 +15,10 @@ from app.email import send_email
 # flask-login需要提供一个 user_loader回调
 @login_manager.user_loader
 def load_user(user_id):
+    if 'is_user' in session:
+        return User.query.filter_by(id=user_id).first()
     if Admin.query.get(user_id):
         return Admin.query.get(user_id)
-    return User.query.filter_by(id=user_id).first()
 
 @auth.before_app_request
 def before_request():
@@ -36,6 +37,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
+            session['is_user'] = 'True'
             login_user(user, form.remember_me.data)
             user.ping()
             user_log = UserLog(user_id=user.id,
@@ -53,6 +55,8 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
+    if 'is_user' in session:
+        session.pop('is_user')
     logout_user()
     flash('已经退出当前账户')
     return redirect(url_for('home.index'))

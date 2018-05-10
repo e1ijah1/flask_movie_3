@@ -1,0 +1,8 @@
+@media screen and (max-width: 767px) {
+    .sidebar-offcanvas {
+        position: absolute;
+        top: 0;
+        width: 30%; /* 6 columns */
+        /*right: 50%;*/
+      }
+}

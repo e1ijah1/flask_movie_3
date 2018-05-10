@@ -8,6 +8,7 @@ import os
 
 class Config:
     # ADMIN_INDEX_URL = '/power'
+    CACHE_DEFAULT_TIMEOUT = 50
     BABEL_DEFAULT_LOCALE = 'zh_Hans_CN'
     SITE_NAME = 'CiliCili Video'
     VIDEO_COMMENTS_PER_PAGE = 5
@@ -43,7 +44,7 @@ class DevelopmentConfig(Config):
 
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://root:toor@localhost:{}/{}?charset=utf8'.format(PORT, DATABASE)
 
-    REDIS_URL = "redis://localhost:6379/0"
+    REDIS_URL = "redis://localhost:6379/1"
 
 class ProductionConfig(Config):
     HOSTNAME = '127.0.0.1'

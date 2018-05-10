@@ -9,23 +9,64 @@ from flask import render_template, flash, current_app, redirect, url_for, reques
 from flask_login import login_required, current_user
 from app.home.forms import VideoUpload, CommentForm, SearchForm, EditProfileForm
 from werkzeug.utils import secure_filename
-from app.models import Video, Comment, User, UserLog
-from app import db
+from app.models import Video, Comment, User, UserLog, VideoTag, Admin
+from app import db, cache
 import os, uuid, stat
 from datetime import datetime
 from app import videos, images
 from PIL import Image
 from app.decorators import admin_required
 
+@home.route('/initialize')
+def initialize():
+    try:
+        db.create_all()
+    except:
+        abort(404)
+    admin_list = db.session.query(Admin).all()
+    if admin_list:
+        abort(404)
+    flash('数据表创建成功!')
+    admin = Admin(name='admin',
+                  email='admin@admin.com', password='admin')
+    db.session.add(admin)
+    flash('管理员账户: admin 密码: admin 准备提交')
+    tag_list = ['技术', '科普', '娱乐', '生活', '记录', '电影', '音乐']
+    for t in tag_list:
+        tag = VideoTag(name=t)
+        db.session.add(tag)
+        flash('标签列表准备提交')
+    try:
+        db.session.commit()
+        flash('所有事务提交成功!')
+    except:
+        flash('未知错误!')
+        db.session.rollback()
+    return redirect(url_for('home.index'))
 
 @home.route('/')
+@cache.cached()
 def index():
     # flash('欢迎!')
     page = request.args.get('page', 1, type=int)
-    pagination = Video.query.order_by(Video.add_time.desc()).paginate(page, per_page=current_app.config['INDEX_VIDEO_PER_PAGE'],
-                                                                      error_out=False)
+    pagination = Video.query.order_by(Video.add_time.desc()).\
+        paginate(page, per_page=current_app.config['INDEX_VIDEO_PER_PAGE'], error_out=False)
     videos = pagination.items
-    return render_template('home/index.html', pagination=pagination, videos=videos)
+    tags = VideoTag.query.all()
+    return render_template('home/index.html',
+                           pagination=pagination, videos=videos, tags=tags)
+
+@home.route('/tag/<tagname>')
+@cache.cached()
+def show_tag(tagname):
+    page = request.args.get('page', 1, type=int)
+    tag = VideoTag.query.filter_by(name=tagname).first()
+    pagination = Video.query.filter_by(tag_id=tag.id).order_by(Video.add_time.desc())\
+        .paginate(page, per_page=current_app.config['INDEX_VIDEO_PER_PAGE'], error_out=False)
+    videos = pagination.items
+    tags = VideoTag.query.all()
+    return render_template('home/index.html', pagination=pagination,
+                           videos=videos, tags=tags, active=tagname)
 
 @home.route('/user/<username>')
 def user(username):
@@ -244,13 +285,16 @@ def upload():
         cover_filename = images.save(form.cover.data, name=expand_filename(form.cover.data.filename))
         # form.video.data.save(os.path.join(current_app.config['VIDEO_UPLOAD_URL'], video_filename))
         # form.cover.data.save(os.path.join(current_app.config['COVER_UPLOAD_URL'], cover_filename))
-
+        tag =  VideoTag.query.filter_by(name=form.data['tag']).first()
+        if not tag:
+            tag = VideoTag.query.first()
         video = Video(
             title=form.data['title'],
             url=video_filename,
             intro=form.data['intro'],
             cover=cover_filename,
-            uploader=current_user
+            uploader=current_user,
+            video_tag = tag
         )
         db.session.add(video)
         try:
@@ -289,35 +333,57 @@ def search():
     # query = Video.query.filter(Video.title.ilike('%' + key + '%'))
 
 '''
+弹幕处理工厂函数
+'''
+def danmu_factory(dict):
+    l = []
+    l.append(dict.get('time'))
+    t = dict.get('type')
+    if t == 'right':
+        t = 0
+    elif t == 'top':
+        t = 1
+    elif t == 'bottom':
+        t = 2
+    l.append(t)
+    l.append(dict.get('color'))
+    l.append(dict.get('author'))
+    l.append(dict.get('text'))
+    return l
+
+'''
 api url 升级为v2, 故变更为 '/<name>/v2/'
 '''
 from app import rd
 from flask import Response
 import json
-@home.route("/tm/v2/", methods=['GET', 'POST'])
-def tm():
+@home.route("/danmu/v2/", methods=['GET', 'POST'])
+# @cache.cached(30) 用缓存会发送不了弹幕
+def danmu():
     """
     弹幕消息处理
     """
     if request.method == "GET":
-        # 获取弹幕消息队列
+        # 获取弹幕队列
         id = request.args.get('id')
         # 存放在redis队列中的键值
-        key = "video" + str(id)
+        key = "video:" + str(id)
         if rd.llen(key):
             msgs = rd.lrange(key, 0, 2999)
+            # msgs 是 bytes 的 list, json.loads(v) 得到 单条弹幕的 dict
+            dict_list = [json.loads(v) for v in msgs]
             res = {
-                "code": 1,
-                "danmaku": [json.loads(v) for v in msgs]
+                "code": 0,
+                "danmaku": [danmu_factory(d) for d in dict_list]
             }
         else:
             res = {
-                "code": 1,
+                "code": 0,
                 "danmaku": []
             }
 
     elif request.method == "POST":
-        # 添加弹幕
+        # 添加弹幕, 将 JSON 转换回 Python 数据结构
         data = json.loads(request.get_data())
         msg = {
             "__v": 0,
@@ -327,18 +393,19 @@ def tm():
             "color": data["color"],
             "type": data['type'],
             "ip": request.remote_addr,
+            "referer": request.base_url,
             "_id": datetime.now().strftime("%Y%m%d%H%M%S") + uuid.uuid4().hex,
             "player": [
                 data["player"]
             ]
         }
         res = {
-            "code": 1,
+            "code": 0,
             "data": msg,
             "msg": '发送弹幕成功'
         }
-        # 将添加的弹幕推入redis的队列中
-        rd.lpush("video" + str(data["player"]), json.dumps(msg))
+        # 将添加的弹幕作为值转换为 JSON 推入redis的队列中
+        rd.lpush("video:" + str(data["player"]), json.dumps(msg))
 
     resp = json.dumps(res)
     return Response(resp, mimetype='application/json')

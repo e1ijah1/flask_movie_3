@@ -6,22 +6,33 @@ __time__ = '2018/3/18 13:54'
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import StringField, TextAreaField, SubmitField
+from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from wtforms.validators import DataRequired, Length, Regexp
 from wtforms import ValidationError
-from app import videos, images
-from app.models import Video, User
+from app import videos, images, cache
+from app.models import Video, User, VideoTag
+
+@cache.cached(key_prefix='query_factory')
+def query_factory():
+    return [t.name for t in VideoTag.query.all()]
 
 class VideoUpload(FlaskForm):
+
+    def get_pk(self):
+        return self
+
     title = StringField(label='视频标题', validators=[DataRequired('标题不能为空!'),
                                                   Regexp("^(?!_)(?!.*?_$)[a-zA-Z0-9_\u4e00-\u9fa5]+$", 0,
                                                          '视频标题只能包含汉字, 数字, 字母及下划线, 并且不能以下划线开头和结尾！'),
-                                                  Length(1, 200)])
+                                                  Length(1, 32)])
     video = FileField(label='视频文件', validators=[FileRequired('请上传视频文件!'),
                                               FileAllowed(videos, '不支持的视频格式!!')
                                                 ])
     intro = TextAreaField(label='简介', validators=[DataRequired('简介不能为空!')])
     cover = FileField(label='封面', validators=[FileRequired('请上传封面!'),
                                               FileAllowed(images, '不支持的图片格式!!')])
+    tag = QuerySelectField(label='视频分类', validators=[DataRequired()],
+                           query_factory=query_factory, get_pk=get_pk)
     submit = SubmitField('上传', render_kw={
         'class': 'btn btn-primary form-control',
     })

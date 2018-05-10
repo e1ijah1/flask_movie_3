@@ -88,7 +88,6 @@ class Video(db.Model):
     def __init__(self, **kwargs):
         super(Video, self).__init__(**kwargs)
         self.playnum = 0
-        self.like = 0
 
     def play(self):
         self.playnum += 1
@@ -133,14 +132,6 @@ class User(db.Model, UserMixin):
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
-        if Admin.query.first() is None:
-            admin = Admin(name='admin',
-                          email=current_app.config['SITE_ADMIN_EMAIL'] or 'f1renze@163.com', password='admin')
-            db.session.add(admin)
-            try:
-                db.session.commit()
-            except:
-                db.session.rollback()
         if self.email is not None and self.avatar_hash is None:
             self.avatar_hash = self.gravatar_hash()
 
