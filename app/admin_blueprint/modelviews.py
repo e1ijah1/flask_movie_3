@@ -5,13 +5,14 @@ __time__ = '18-4-23 下午10:07'
 
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
-from flask import redirect, url_for, current_app, flash
+from flask import redirect, url_for, current_app, request
 from flask_admin.model.template import macro
 from jinja2 import Markup
 from PIL import Image
 from .forms import TagForm, VideoForm, UserForm, AdminForm
+from wtforms import ValidationError
 from app import db
-from app.models import Admin, Video, User
+from app.models import Video, VideoTag, AdminLog
 import os
 
 class BaseModelView(ModelView):
@@ -22,12 +23,34 @@ class BaseModelView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated
 
+    def after_model_change(self, form, model, is_created):
+        if is_created:
+            admin_log = AdminLog(admin=current_user, ip=request.remote_addr,
+                                 info='创建了 ' + str(model))
+        elif not is_created:
+            admin_log = AdminLog(admin=current_user, ip=request.remote_addr,
+                                 info='修改了' + str(model))
+        db.session.add(admin_log)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+
+    def after_model_delete(self, model):
+        admin_log = AdminLog(admin=current_user, ip=request.remote_addr,
+                             info='删除了' + str(model))
+        db.session.add(admin_log)
+        try:
+            db.session.commit()
+        except:
+            db.session.rollback()
+
 class TagModelView(BaseModelView):
     # pass
     form = TagForm
 
     column_labels = {
-        'name': '标签名',
+        'name': '分类名',
         'add_time': '添加时间'
     }
 
@@ -115,9 +138,16 @@ class VideoModelView(BaseModelView):
         'thumbnail_cover': '封面缩略图',
         'playnum': '播放数',
         'add_time': '上传时间',
-        'video_tag': '视频标签',
+        'video_tag': '视频分类',
         'uploader': '上传者'
     }
+
+    def on_model_change(self, form, model, is_created):
+        if not is_created:
+            if Video.query.filter_by(title=form.title.data).first() != model:
+                raise ValidationError('视频标题已经被使用')
+            tag = VideoTag.query.filter_by(name=form.tag.data).first()
+            model.video_tag = tag
 
 class CommentModelView(BaseModelView):
     can_create = False
@@ -151,15 +181,8 @@ class AdminModelView(BaseModelView):
     form = AdminForm
 
     def on_model_change(self, form, model, is_created):
-        if is_created and form.validate_on_submit():
-            admin = Admin(name=form.name.data,
-                          email=form.email.data,
-                          password=form.password.data)
-            db.session.add(admin)
-            try:
-                db.session.commit()
-            except:
-                db.session.rollback()
+        if is_created:
+            model.password = form.password.data
 
     column_exclude_list = ['password_hash']
 

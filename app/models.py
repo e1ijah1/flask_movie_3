@@ -21,7 +21,7 @@ class VideoTag(db.Model):
                              lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
-        return '<VideoTag %r>' % self.name
+        return '[视频分类: %r]' % self.name
 
 ''' #使用多对多模型出现一系列问题??
 # 1. (_mysql_exceptions.IntegrityError) (1215, 'Cannot add foreign key constraint')
@@ -98,7 +98,7 @@ class Video(db.Model):
             db.session.rollback()
 
     def __repr__(self):
-        return '<Video %r>' % self.title
+        return '[视频: %r]' % self.title
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
@@ -299,7 +299,7 @@ class User(db.Model, UserMixin):
                                                                      default=default, rating=rating)
 
     def __repr__(self):
-        return '<User %r>' % self.username
+        return '[用户: %r]' % self.username
 
 
 class UserLog(db.Model):
@@ -311,7 +311,7 @@ class UserLog(db.Model):
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
-        return '<UserLog %r>' % self.user.username
+        return '[用户日志: %r]' % self.user.username
 
 class Comment(db.Model):
     __tablename__ = 'comment'
@@ -323,7 +323,7 @@ class Comment(db.Model):
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
-        return '<Comment %r>' % self.content[:20]
+        return '[评论: %r]' % self.content[:20]
 
 
 class Admin(db.Model, UserMixin):
@@ -418,7 +418,7 @@ class Admin(db.Model, UserMixin):
         return True
 
     def __repr__(self):
-        return '<Admin %r>' % self.name
+        return '[管理员: %r]' % self.name
 
 
 class AdminLog(db.Model):
@@ -430,5 +430,5 @@ class AdminLog(db.Model):
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
     def __repr__(self):
-        return '<AdminLog %r>' % self.admin.email
+        return '[管理员日志: %r]' % self.admin.name
 

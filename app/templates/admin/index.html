@@ -12,17 +12,8 @@
        <h1>身份过期, 请重新登录!</h1>
    </a>
 </div>
-{% endif %}
-{% endblock %}
-
-{% block tail_js %}
-{{ super() }}
 <script>
- window.onload = function()
- {
-     if ('{{ current_user.is_admin and current_user.is_authenticated }}' == 'False') {
-         window.location.href = "{{ url_for('admin.login_view') }}"
-     }
- }
+window.location.href = "{{ url_for('admin.login_view') }}"
 </script>
+{% endif %}
 {% endblock %}

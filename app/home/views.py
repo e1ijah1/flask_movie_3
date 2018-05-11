@@ -360,15 +360,14 @@ import json
 @home.route("/danmu/v2/", methods=['GET', 'POST'])
 # @cache.cached(30) 用缓存会发送不了弹幕
 def danmu():
-    """
-    弹幕消息处理
-    """
     if request.method == "GET":
         # 获取弹幕队列
         id = request.args.get('id')
         # 存放在redis队列中的键值
         key = "video:" + str(id)
+        # Llen 获取列表长度
         if rd.llen(key):
+            # Lrange 获取列表指定范围内的元素
             msgs = rd.lrange(key, 0, 2999)
             # msgs 是 bytes 的 list, json.loads(v) 得到 单条弹幕的 dict
             dict_list = [json.loads(v) for v in msgs]
@@ -405,6 +404,7 @@ def danmu():
             "msg": '发送弹幕成功'
         }
         # 将添加的弹幕作为值转换为 JSON 推入redis的队列中
+        # Lpush 将一个或多个值插入到列表头部
         rd.lpush("video:" + str(data["player"]), json.dumps(msg))
 
     resp = json.dumps(res)

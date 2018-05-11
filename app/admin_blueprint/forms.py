@@ -89,42 +89,35 @@ class UETextAreaWidget(TextArea):
 class UETextAreaField(TextAreaField):
     widget = UETextAreaWidget()
 
-class TagForm(BaseForm, FlaskForm):
-    name = StringField('标签名', validators=[DataRequired('标签不能为空'), Length(1, 100),
+class TagForm(BaseForm):
+    name = StringField('分类名', validators=[DataRequired('分类名不能为空'), Length(1, 100),
                                           Regexp("^(?!_)(?!.*?_$)[a-zA-Z0-9_\u4e00-\u9fa5]+$", 0,
-                                                 '标签只能包含汉字, 数字, 字母及下划线, 并且不能以下划线开头和结尾！')])
+                                                 '分类名只能包含汉字, 数字, 字母及下划线, 并且不能以下划线开头和结尾！')])
 
-    def validate_name(self, field):
-        if VideoTag.query.filter_by(name=field.data).first():
-            raise ValidationError('标签名已经被使用了')
+def tag_query_factory():
+    return [t.name for t in VideoTag.query.all()]
 
-class VideoForm(BaseForm, FlaskForm):
+from wtforms.ext.sqlalchemy.fields import QuerySelectField
+class VideoForm(BaseForm):
+    def get_pk(self):
+        return self
+
     title = StringField('视频标题', validators=[DataRequired('视频标题不能为空'), Length(1, 200),
                                             Regexp("^(?!_)(?!.*?_$)[a-zA-Z0-9_\u4e00-\u9fa5]+$", 0,
                                                    '视频标题只能包含汉字, 数字, 字母及下划线, 并且不能以下划线开头和结尾！')])
+    tag = QuerySelectField('视频分类', validators=[DataRequired()],
+                           query_factory=tag_query_factory, get_pk=get_pk)
     intro = CKTextAreaField('简介', validators=[DataRequired('简介不能为空')])
 
-    def validate_title(self, field):
-        if Video.query.filter_by(title=field.data).first():
-            raise ValidationError('视频标题已经被使用了')
-
-class UserForm(BaseForm, FlaskForm):
+class UserForm(BaseForm):
     username = StringField('用户名', validators=[DataRequired('用户名不能为空'),
                                               Regexp("^(?!_)(?!.*?_$)[a-zA-Z0-9_\u4e00-\u9fa5]+$", 0,
                                                      '用户名只能包含汉字, 数字, 字母及下划线, 并且不能以下划线开头和结尾！'),
                                               Length(1, 128)])
-    phone = StringField('手机号码', validators=[DataRequired('请填写手机号码'),
-                                            Length(1, 11),
-                                            Regexp("^(13[0-9]|14[579]|15[0-3,5-9]|17[0135678]|18[0-9])\d{8}$", 0,
-                                                   '请填写正确的手机号码格式！')])
-    locaion = StringField('所在地', validators=[Length(1, 64)])
+    locaion = StringField('所在地', validators=[Length(0, 64)])
     info = UETextAreaField('用户简介')
 
-    def validate_username(self, field):
-        if field.data != self.user.username and User.query.filter_by(username=field.data).first():
-            raise ValidationError('用户名已经被使用了')
-
-class AdminForm(BaseForm, FlaskForm):
+class AdminForm(BaseForm):
     name = StringField('账户名', validators=[DataRequired('账户名不能为空！'), Length(1, 64),
                                           Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
                                                  '用户名只能以字母开头, 且只能包含字母, 数字, 点或下划线!')])
@@ -135,13 +128,5 @@ class AdminForm(BaseForm, FlaskForm):
     password = PasswordField('密码', validators=[DataRequired('密码不能为空！'),
                                                EqualTo('password2', message='两次密码必须一致')])
     password2 = PasswordField('再次确认密码', validators=[DataRequired('确认密码不能为空!')])
-
-    def validate_email(self, field):
-        if Admin.query.filter_by(email=field.data).first():
-            raise ValidationError('此邮箱已经被使用')
-
-    def validate_name(self, field):
-        if Admin.query.filter_by(name=field.data).first():
-            raise ValidationError('账户名已经被使用')
 
 

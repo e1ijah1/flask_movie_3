@@ -11,7 +11,7 @@ from app.admin_blueprint.modelviews import BaseModelView, \
 from . import f_admin
 
 
-f_admin.add_view(TagModelView(VideoTag, db.session, name='标签管理'))
+f_admin.add_view(TagModelView(VideoTag, db.session, name='视频分类项'))
 f_admin.add_view(VideoModelView(Video, db.session, name='视频管理'))
 f_admin.add_view(UserModelView(User, db.session, name='用户管理'))
 f_admin.add_view(CommentModelView(Comment, db.session, name='评论管理', category='高级'))
