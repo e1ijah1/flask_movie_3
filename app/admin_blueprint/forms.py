@@ -4,11 +4,12 @@ __author__ = 'F1renze'
 __time__ = '2018/3/18 13:54'
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, \
-    TextAreaField, FileField, SelectField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, Regexp
+from wtforms import StringField, PasswordField, \
+    SubmitField, SelectField
+from wtforms.validators import DataRequired, Length, \
+    Email, EqualTo, Regexp
 from wtforms import ValidationError
-from app.models import Video, VideoTag, User, Admin
+from app.models import VideoTag, Admin
 
 class AdminLoginForm(FlaskForm):
     name = StringField('管理员账户', validators=[DataRequired('账户名不能为空!'), Length(1, 64),
@@ -57,8 +58,10 @@ class ChangeEmailForm(FlaskForm):
         if Admin.query.filter_by(email=field.data).first():
             raise ValidationError('邮箱已经被使用')
 
-# 后台编辑表单
-from flask_admin.form import BaseForm
+'''
+后台编辑表单
+'''
+from flask_admin.form import SecureForm
 from wtforms import TextAreaField
 from wtforms.widgets import TextArea
 
@@ -89,7 +92,7 @@ class UETextAreaWidget(TextArea):
 class UETextAreaField(TextAreaField):
     widget = UETextAreaWidget()
 
-class TagForm(BaseForm):
+class TagForm(SecureForm):
     name = StringField('分类名', validators=[DataRequired('分类名不能为空'), Length(1, 100),
                                           Regexp("^(?!_)(?!.*?_$)[a-zA-Z0-9_\u4e00-\u9fa5]+$", 0,
                                                  '分类名只能包含汉字, 数字, 字母及下划线, 并且不能以下划线开头和结尾！')])
@@ -98,7 +101,7 @@ def tag_query_factory():
     return [t.name for t in VideoTag.query.all()]
 
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
-class VideoForm(BaseForm):
+class VideoForm(SecureForm):
     def get_pk(self):
         return self
 
@@ -109,15 +112,19 @@ class VideoForm(BaseForm):
                            query_factory=tag_query_factory, get_pk=get_pk)
     intro = CKTextAreaField('简介', validators=[DataRequired('简介不能为空')])
 
-class UserForm(BaseForm):
+class UserForm(SecureForm):
     username = StringField('用户名', validators=[DataRequired('用户名不能为空'),
                                               Regexp("^(?!_)(?!.*?_$)[a-zA-Z0-9_\u4e00-\u9fa5]+$", 0,
                                                      '用户名只能包含汉字, 数字, 字母及下划线, 并且不能以下划线开头和结尾！'),
                                               Length(1, 128)])
+    dis_haed_img = SelectField('禁用自定义头像',
+                                    choices=[
+                                        ('False', '否'), ('True', '是')
+                                    ])
     locaion = StringField('所在地', validators=[Length(0, 64)])
     info = UETextAreaField('用户简介')
 
-class AdminForm(BaseForm):
+class AdminForm(SecureForm):
     name = StringField('账户名', validators=[DataRequired('账户名不能为空！'), Length(1, 64),
                                           Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0,
                                                  '用户名只能以字母开头, 且只能包含字母, 数字, 点或下划线!')])

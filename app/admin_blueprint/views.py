@@ -25,3 +25,13 @@ Both share the same name "admin".  Blueprints that are created on the fly need u
 '''
 f_admin.add_view(AdminModelView(Admin, db.session, name='管理员账户', endpoint='admin_account', category='高级'))
 f_admin.add_view(AdminLogModelView(AdminLog, db.session, name='管理员日志', category='日志'))
+
+'''
+管理静态文件
+'''
+from flask_admin.contrib.fileadmin import FileAdmin
+import os
+
+# 取得父目录下的　static 文件夹路径
+path = os.path.join(os.path.dirname(__file__), os.path.pardir, 'static')
+f_admin.add_view(FileAdmin(path, '/static/', name='[重要]静态文件', category='系统'))

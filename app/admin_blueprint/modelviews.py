@@ -5,7 +5,7 @@ __time__ = '18-4-23 下午10:07'
 
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user
-from flask import redirect, url_for, current_app, request
+from flask import redirect, url_for, current_app, request, flash
 from flask_admin.model.template import macro
 from jinja2 import Markup
 from PIL import Image
@@ -46,8 +46,8 @@ class BaseModelView(ModelView):
             db.session.rollback()
 
 class TagModelView(BaseModelView):
-    # pass
     form = TagForm
+    column_default_sort = 'add_time'
 
     column_labels = {
         'name': '分类名',
@@ -93,15 +93,17 @@ class UserModelView(BaseModelView):
     }
 
     column_exclude_list = ['password_hash', 'avatar_hash']
+    column_searchable_list = ('email', 'username', 'info', 'location', 'phone')
+    column_default_sort = ('member_since', True)
+
+    def on_model_change(self, form, model, is_created):
+        if not is_created and form.dis_haed_img.data == 'True':
+            model.head_img = None
+            model.thumb_head_img = None
 
 class VideoModelView(BaseModelView):
     form = VideoForm
-
     edit_template = 'admin/edit/_video_edit.html'
-
-    # form_overrides = {
-    #     'intro': CKTextAreaField
-    # }
 
     can_create = False
 
@@ -141,13 +143,19 @@ class VideoModelView(BaseModelView):
         'video_tag': '视频分类',
         'uploader': '上传者'
     }
+    column_sortable_list = ('title', 'intro', 'thumbnail_cover',
+                            'url', 'playnum', 'add_time',
+                            ('video_tag', 'video_tag.name'), ('uploader', 'uploader.username'))
+    column_searchable_list = ('title', 'intro', 'video_tag.name', 'uploader.username')
+    column_default_sort = ('add_time', True)
 
     def on_model_change(self, form, model, is_created):
         if not is_created:
             if Video.query.filter_by(title=form.title.data).first() != model:
                 raise ValidationError('视频标题已经被使用')
-            tag = VideoTag.query.filter_by(name=form.tag.data).first()
-            model.video_tag = tag
+            if form.tag.data != model.video_tag.name:
+                tag = VideoTag.query.filter_by(name=form.tag.data).first()
+                model.video_tag = tag
 
 class CommentModelView(BaseModelView):
     can_create = False
@@ -174,6 +182,10 @@ class CommentModelView(BaseModelView):
     }
 
     column_list = ('content', 'author', 'video', 'add_time', 'disabled')
+    column_sortable_list = ('content', ('author', 'author.username'),
+                            ('video', 'video.title'), 'add_time', 'disabled')
+    column_searchable_list = ('content', 'author.username', 'video.title')
+    column_default_sort = ('add_time', True)
 
 class AdminModelView(BaseModelView):
     can_edit = False
@@ -185,6 +197,7 @@ class AdminModelView(BaseModelView):
             model.password = form.password.data
 
     column_exclude_list = ['password_hash']
+    column_searchable_list = ('name', 'email')
 
     column_labels = {
         'name': '账户名',
@@ -201,6 +214,9 @@ class UserLogModelView(BaseModelView):
     can_edit = False
 
     column_list = ('info', 'user', 'ip', 'add_time')
+    column_sortable_list = ('info', ('user', 'user.username'), 'ip', 'add_time')
+    column_searchable_list = ('ip', 'user.username', 'info')
+    column_default_sort = ('add_time', True)
 
     column_labels = {
         'info': '日志摘要',
@@ -221,6 +237,9 @@ class AdminLogModelView(BaseModelView):
     can_delete = False
 
     column_list = ('info', 'admin', 'ip', 'add_time')
+    column_sortable_list = ('info', ('admin', 'admin.name'), 'ip', 'add_time')
+    column_searchable_list = ('info', 'ip', 'admin.name')
+    column_default_sort = ('add_time', True)
 
     column_labels = {
         'info': '日志摘要',

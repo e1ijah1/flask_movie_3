@@ -69,6 +69,7 @@ def show_tag(tagname):
                            videos=videos, tags=tags, active=tagname)
 
 @home.route('/user/<username>')
+@cache.cached()
 def user(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
