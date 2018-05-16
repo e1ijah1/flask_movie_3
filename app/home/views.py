@@ -19,10 +19,6 @@ from app.decorators import admin_required
 
 @home.route('/initialize')
 def initialize():
-    try:
-        db.create_all()
-    except:
-        abort(404)
     admin_list = db.session.query(Admin).all()
     if admin_list:
         abort(404)
