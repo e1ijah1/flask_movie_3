@@ -21,26 +21,36 @@
     action="{{ url_for('home.upload') }}">
         {{ form.hidden_tag() }}
         <div class="form-group">
-            {{ form.title.label(for='title') }}
+
+            {{ form.title.label(for='title') }}<span style="color:red;">&nbsp;*</span>
             {{ form.title(class='form-control', id='title', placeholder='输入视频标题') }}
         </div>
         <div class="form-group">
-            {{ form.tag.label(for='tag') }}
+            {{ form.tag.label(for='tag') }}<span style="color:red;">&nbsp;*</span>
             {{ form.tag(class='form-control', id='tag') }}
         </div>
         <div class="'form-group">
-        {{ form.video.label(for='video') }}
+        {{ form.video.label(for='video') }}<span style="color:red;">&nbsp;*</span>
         {{ form.video(class='form-control', id='video') }}
         </div>
         <br>
         <div class="form-group">
-            {{ form.intro.label(for='intro') }}
+            {{ form.intro.label(for='intro') }}<span style="color:red;">&nbsp;*</span>
             {{ form.intro(class='ckeditor form-control', id='intro', placeholder='介绍视频内容') }}
         </div>
         <div class="form-group">
-            {{ form.cover.label(for='cover') }}
+            {{ form.cover.label(for='cover') }}<span style="color:red;">&nbsp;*</span>
             {{ form.cover(class='form-control', id='cover') }}
         </div>
+        <p>
+            <b>
+                视频文件最大不能超过666M! 且仅支持以下格式:<br>
+            'mp4', 'flv', 'avi', 'wmv', 'mov', 'webm', 'mpeg4', 'ts', 'mpg', 'rm', 'rmvb', 'mkv'<br>
+            </b>
+            <span style="color:red;">
+                * 表示此项不能为空!
+            </span>
+        </p>
 
         {{ form.submit() }}
     </form>
