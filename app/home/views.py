@@ -41,7 +41,7 @@ def initialize():
     return redirect(url_for('home.index'))
 
 @home.route('/')
-@cache.cached()
+@cache.cached(30)
 def index():
     # flash('欢迎!')
     page = request.args.get('page', 1, type=int)

@@ -16,6 +16,8 @@ class MyIndexView(AdminIndexView):
 
     @expose('/')
     def index(self):
+        if not current_user.is_authenticated:
+            return redirect(url_for('.login_view'))
         return super(MyIndexView, self).index()
 
     @expose('/login ', methods=('GET', 'POST'))

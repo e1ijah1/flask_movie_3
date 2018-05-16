@@ -162,7 +162,7 @@
                                     <i class="fa fa-warning fa-fw" style="color:red"></i>
                                     账户邮箱未确认！
                                     <span class="pull-right text-muted small">
-                                        {% if current_user.admin_logs %}
+                                        {% if current_user.is_authenticated and current_user.admin_logs.all() %}
                                         {{ moment(current_user.admin_logs[-1].add_time).fromNow().format('L') }}
                                         {% endif %}
                                     </span>
