@@ -94,8 +94,9 @@ class MyIndexView(AdminIndexView):
         if form.validate_on_submit():
             if current_user.verify_password(form.password.data):
                 new_email = form.email.data
-                token = current_user.generate_email_token(new_email)
+                token = current_user.generate_email_change_token(new_email)
                 send_email(new_email, '确认新邮箱地址', 'admin/email/change_email', admin=current_user, token=token)
+                flash('一封更改邮箱邮件已经发送, 请检查你的邮箱')
                 return redirect(url_for('.index'))
             else:
                 flash('无效邮箱或密码')
@@ -105,7 +106,13 @@ class MyIndexView(AdminIndexView):
     @login_required
     def change_email_view(self, token):
         if current_user.change_email(token):
+            current_user.confirmed = True
             flash('管理员' + current_user.name + ', 您的邮箱已经更改')
+            db.session.add(current_user)
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
         else:
             flash('无效请求!')
         return redirect(url_for('.index'))
