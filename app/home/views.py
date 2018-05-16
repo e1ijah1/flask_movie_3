@@ -131,6 +131,29 @@ def edit_profile():
     form.location.data = current_user.location
     return render_template('home/edit_profile.html', form=form, user=current_user)
 
+@home.route('/user/collections/<username>')
+@login_required
+def display_collections(username):
+    if current_user.username != username:
+        abort(403)
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        abort(404)
+    page = request.args.get('page', 1, type=int)
+    if page == -1:
+        page = (user.collect_videos.count() - 1) // current_app.config['SEARCH_PER_PAGE'] + 1
+    pagination = user.collect_videos.paginate(page,
+                                              per_page=current_app.config['SEARCH_PER_PAGE'],
+                                              error_out=False)
+    return render_template('home/video_collections.html', user=user, pagination=pagination)
+
+@home.route('/user/collections/uncollect/<int:id>')
+@login_required
+def user_uncollect(id):
+    video = Video.query.get_or_404(id)
+    current_user.uncollect(video)
+    return redirect(url_for('home.display_collections', username=current_user.username))
+
 @home.route('/video/delete/<int:id>')
 @login_required
 def delete_video(id):
@@ -148,6 +171,7 @@ def delete_video(id):
     return redirect(url_for('.user', username=current_user.username))
 
 @home.route('/comment/delete/<int:id>')
+@login_required
 def delete_comment(id):
     comment = Comment.query.get_or_404(id)
     video_id = comment.video_id
@@ -197,6 +221,7 @@ def enable_comment(id):
 
 #视频收藏
 @home.route('/video/collect/<int:id>')
+@login_required
 def video_collect(id):
     video = Video.query.get_or_404(id)
     if current_user.collect(video):
@@ -207,6 +232,7 @@ def video_collect(id):
         return 'False:'+str(video.collecters.count())
 
 @home.route('/video/uncollect/<int:id>')
+@login_required
 def video_uncollect(id):
     video = Video.query.get_or_404(id)
     if current_user.uncollect(video):
@@ -216,8 +242,8 @@ def video_uncollect(id):
         # flash('额, 发生未知错误, 请重试')
         return 'False:'+str(video.collecters.count())
 
-
 @home.route('/video/like/<int:id>')
+@login_required
 def video_like(id):
     video = Video.query.get_or_404(id)
     ip = request.remote_addr
@@ -227,6 +253,7 @@ def video_like(id):
         return 'False:'+str(video.likers.count())
 
 @home.route('/video/unlike/<int:id>')
+@login_required
 def video_unlike(id):
     video = Video.query.get_or_404(id)
     ip = request.remote_addr

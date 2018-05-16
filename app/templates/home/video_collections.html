@@ -1,0 +1,106 @@
+{% extends 'home/base.html' %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    body {
+           background-color: #eee;
+    }
+
+    .info img {
+        width:25px;
+        height:25px;
+    }
+
+    .bar {
+        width:20px;
+        height:20px;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+
+            <ul class="list-group">
+                {% if pagination.items %}
+                <li class="list-group-item list-group-item-warning text-center">
+                    <b>我收藏的视频</b>
+                </li>
+                {% else %}
+                <li class="list-group-item list-group-item-secondary text-center">
+                    <b>你还没有收藏过视频呢~</b>
+                </li>
+                {% endif %}
+            </ul>
+            <p></p>
+
+            {% if not pagination.items %}
+            <h2 class="text-center">这里空空如也呢</h2>
+            {% endif %}
+
+            {% for video in pagination.items %}
+
+            <div class="media rounded border border-success" style="padding: 10px;">
+                <a class="mr-3" href="{{ url_for('home.video',id=video.id) }}">
+                    <img width="150px" height="100px"
+                         src="{{ url_for('static',filename='uploads/images/'+video.cover) }}"
+                         alt="{{ video.title }}">
+                </a>
+                <div class="media-body">
+                    <h4 class="mt-0">{{ video.title }}
+                        <a href="{{ url_for('home.video', id=video.id) }}"
+                           class="btn btn-success float-right">
+                            <span class="glyphicon glyphicon-play"></span>播放影片
+                        </a>
+                    </h4>
+                    <span>{{ video.intro | safe }}</span>
+
+                    {% if user == current_user %}
+                    <!--不支持多模态-->
+                    <div class="dropdown">
+                        <button type="button"
+                                class="btn btn-outline-secondary dropdown-toggle float-right"
+                                data-toggle="dropdown">不再收藏
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item active bg-secondary" id="collect"
+                               href="{{ url_for('home.user_uncollect', id=video.id) }}">确认</a>
+                            <a class="dropdown-item">取消</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="float-right">
+                        <img class="ml-3 rounded" height="40px" width="40px"
+                             src="{% if video.uploader.head_img %}{{ video.uploader.thumb_head_img }}
+                             {% else %}{{ video.uploader.gravatar(size=40) }}{% endif %}">
+                        &nbsp;&nbsp;<b>{{ video.uploader.username }}</b>
+                    </div>
+                    {% endif %}
+
+                    <img class="bar" src="{{ url_for('static', filename='web/icons/open.png') }}">&nbsp;&nbsp;&nbsp;
+                    <small>{{ video.playnum }}</small>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <img class="bar" src="{{ url_for('static', filename='web/icons/comments.png') }}">&nbsp;&nbsp;&nbsp;
+                    <small>{{ video.comments.count() }}</small>
+                </div>
+            </div>
+            <p></p>
+            {% endfor %}
+        </div>
+
+        {% if pagination.items %}
+        <div class="mx-auto">
+            {% import 'home/_pagination_macros.html' as macros %}
+            <p><br></p>
+            <div class="col-md-12">
+                {{ macros.pagination_widget(pagination, 'home.display_collections', username=user.username) }}
+            </div>
+        </div>
+        {% endif %}
+
+        </div>
+    </div>
+{% endblock %}
