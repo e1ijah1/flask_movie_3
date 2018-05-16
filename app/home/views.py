@@ -45,9 +45,13 @@ def initialize():
 def index():
     # flash('欢迎!')
     page = request.args.get('page', 1, type=int)
-    pagination = Video.query.order_by(Video.add_time.desc()).\
-        paginate(page, per_page=current_app.config['INDEX_VIDEO_PER_PAGE'], error_out=False)
-    videos = pagination.items
+    if Video.query.all() == None:
+        pagination = None
+        videos = None
+    else:
+        pagination = Video.query.order_by(Video.add_time.desc()).\
+            paginate(page, per_page=current_app.config['INDEX_VIDEO_PER_PAGE'], error_out=False)
+        videos = pagination.items
     tags = VideoTag.query.all()
     return render_template('home/index.html',
                            pagination=pagination, videos=videos, tags=tags)
