@@ -22,8 +22,8 @@ class VideoUpload(FlaskForm):
         return self
 
     title = StringField(label='视频标题', validators=[DataRequired('标题不能为空!'),
-                                                  Regexp("^(?!_)(?!.*?_$)[a-zA-Z0-9_\s\-\(\)\u4e00-\u9fa5]+$", 0,
-                                                         '视频标题只能包含汉字, 数字, 字母及下划线, 并且不能以下划线开头和结尾！'),
+                                                  Regexp("^(?!_)(?!.*?_$)[a-zA-Z0-9_\s\-\(\)\?\!\u4e00-\u9fa5]+$", 0,
+                                                         '视频标题只能包含汉字, 数字, 空格, -, ?, !, 括号, 字母及下划线, 并且不能以下划线开头和结尾！'),
                                                   Length(1, 200)])
     video = FileField(label='视频文件', validators=[FileRequired('请上传视频文件!'),
                                               FileAllowed(videos, '不支持的视频格式!!')

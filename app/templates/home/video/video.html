@@ -6,9 +6,8 @@
 {{ super() }}
 
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/dplayer/1.22.2/DPlayer.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dplayer/1.22.2/DPlayer.min.js"></script>
 
-<!--<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='web/css/bootstrap-movie.css') }}">-->
+<!--<link rel="stylesheet" type="text/css" href="web/css/bootstrap-movie.css">-->
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='web/css/comments.css') }}">
 
 <style>
@@ -190,12 +189,17 @@
 
 {% block scripts %}
 {{ super() }}
+<script src="{{ url_for('static', filename='plugin/dplayer/flv.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dplayer/1.22.2/DPlayer.min.js"></script>
 
 <script type="text/javascript">
     const dp = new DPlayer({
         container: document.getElementById('dplayer'),
         video: {
             url: "{{ url_for('static', filename='uploads/videos/'+video.url) }}",
+            {% if video.url.split('.')[-1].lower() == 'flv' %}
+            type: 'flv'
+            {% endif %}
         },
         danmaku: {
             id: '{{ video.id }}',
