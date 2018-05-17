@@ -13,7 +13,7 @@ from .forms import TagForm, VideoForm, UserForm, AdminForm
 from wtforms import ValidationError
 from app import db
 from app.models import Video, VideoTag, AdminLog
-import os
+import os, stat
 
 class BaseModelView(ModelView):
 
@@ -110,6 +110,10 @@ class VideoModelView(BaseModelView):
     list_template = 'admin/list/_video_list.html'
 
     def _list_thumbnail_cover(view, context, model, name):
+        if not os.path.exists(current_app.config['IMG_THUMB_DEST']):
+            os.makedirs(current_app.config['IMG_THUMB_DEST'])
+            os.chmod(current_app.config['IMG_THUMB_DEST'],
+                     stat.S_IRWXU|stat.S_IRGRP|stat.S_IWGRP|stat.S_IROTH)
         # 设置缩略图
         size = 200, 200
         im = Image.open(os.path.join(current_app.config['UPLOADS_DEFAULT_DEST'], 'images/', model.cover))
