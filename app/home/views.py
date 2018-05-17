@@ -69,7 +69,6 @@ def show_tag(tagname):
                            videos=videos, tags=tags, active=tagname)
 
 @home.route('/user/<username>')
-@cache.cached()
 def user(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
@@ -162,7 +161,25 @@ def delete_video(id):
     if current_user != video.uploader:
         abort(403)
     db.session.delete(video)
+    video_file = os.path.join(current_app.config['UPLOADS_DEFAULT_DEST'], 'videos/', video.url)
+    cover_file = os.path.join(current_app.config['UPLOADS_DEFAULT_DEST'], 'images/', video.cover)
+    extension = os.path.splitext(video.cover)
+    thumbnail_name = extension[0] + '_thumbnail' + extension[-1]
+    thumbnail_file = os.path.join(current_app.config['IMG_THUMB_DEST'], thumbnail_name)
     try:
+        if os.path.exists(video_file):
+            os.remove(video_file)
+        if os.path.exists(cover_file):
+            os.remove(cover_file)
+        if os.path.exists(thumbnail_file):
+            os.remove(thumbnail_file)
+    except:
+        error_log = UserLog(user=current_user, ip=request.remote_addr, info='删除视频文件失败!')
+        db.session.add(error_log)
+
+    try:
+        user_log = UserLog(user=current_user, ip=request.remote_addr, info='删除 '+video.title)
+        db.session.add(user_log)
         db.session.commit()
         flash('视频[ ' + name + ' ]已经删除')
     except:
