@@ -74,7 +74,7 @@
             {% import 'home/_pagination_macros.html' as macros %}
             <p><br></p>
             <div class="col-md-12">
-                {{ macros.pagination_widget(pagination, 'home.search') }}
+                {{ macros.pagination_widget(pagination, 'home.search', key=key) }}
             </div>
         </div>
         {% endif %}
