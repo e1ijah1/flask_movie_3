@@ -25,7 +25,7 @@
                 {% else %}
                 <p>{{ comment.content | safe }}</p>
                 {% endif %}
-                {% if comment.author == current_user %}
+                {% if comment.author == current_user and not current_user.is_admin %}
                 <a href="{{ url_for('home.delete_comment', id=comment.id) }}"
                    class="btn btn-outline-danger float-right">删除评论</a>
                 {% elif current_user.is_admin and comment.disabled %}

@@ -38,7 +38,7 @@ def initialize():
     except:
         flash('未知错误!')
         db.session.rollback()
-    return redirect(url_for('home.index'))
+    return redirect(url_for('admin.login_view'))
 
 @home.route('/')
 @cache.cached(30)
