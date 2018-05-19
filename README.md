@@ -61,7 +61,25 @@ $SITE_DEFAULT_ADMIN_PASSWD
 **点赞与弹幕**
 ![点赞](./README_img/like.png)
 
+弹幕发送
 ![弹幕](./README_img/danmu.png)
 
 **后台首页**
 ![后台首页](./README_img/admin_index.png)
+
+**视频管理**
+![视频管理](./README_img/admin_video.png)
+
+**静态文件管理**
+![静态文件管理](./README_img/admin_static.png)
+
+**日志记录**
+![日志记录](./README_img/admin_log.png)
+
+**评论管理**
+![评论管理1](./README_img/admin_comment2.png)
+
+![评论管理2](./README_img/admin_comment.png)
+
+## 反馈
+有任何问题欢迎提 Issue, 共同进步!
