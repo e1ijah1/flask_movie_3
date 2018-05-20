@@ -3,7 +3,7 @@
 ![Flask Version](https://img.shields.io/badge/Flask-0.12.2-green.svg)
 ![Author](https://img.shields.io/badge/Powered%20by-F1renze-blue.svg)
 
-项目上线地址:  [http://www.cilivideo.top/](http://www.cilivideo.top/)
+项目上线地址:  [http://www.cilivideo.top/](http://www.cilivideo.top/)(建议在 PC 上使用 火狐浏览器访问)
 
 此项目是基于 Python / Flask 开发的小型视频网站, 使用 MySQL 作为存储数据库, Redis 提供缓存及弹幕队列支持, 使用开源的HTML5播放器 [DPlayer](https://github.com/MoePlayer/DPlayer) 作为播放器插件, 视频评论区使用了百度的 [UEditor](http://ueditor.baidu.com/website/) 作为编辑器, 视频上传界面使用 [ckeditor](https://ckeditor.com) 作为编辑器, 后台管理使用的是 [Flask-Admin](https://flask-admin.readthedocs.io/en/latest/).
 
