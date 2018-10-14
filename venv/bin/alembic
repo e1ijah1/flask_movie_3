@@ -1,4 +1,4 @@
-#!/home/f1renze/PycharmProjects/flask_movie_3/venv/bin/python
+#!/Users/f1renze/Python/projects/flask_movie_3/venv/bin/python3
 # EASY-INSTALL-ENTRY-SCRIPT: 'alembic==0.9.8','console_scripts','alembic'
 __requires__ = 'alembic==0.9.8'
 import re

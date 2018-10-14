@@ -3,6 +3,8 @@
 __author__ = 'F1renze'
 __time__ = '2018/3/18 13:52'
 
+import os
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from config import config
@@ -21,7 +23,7 @@ rd = FlaskRedis()
 babel = Babel()
 cache = Cache(config={
     'CACHE_TYPE': 'redis',
-    'CACHE_REDIS_HOST': '127.0.0.1',
+    'CACHE_REDIS_HOST': os.environ.get('REDIS_HOST'),
     'CACHE_REDIS_PORT': 6379,
     'CACHE_REDIS_DB': 2
 })

@@ -31,6 +31,9 @@ class Config:
     # VIDEO_UPLOAD_URL = os.path.join(os.path.abspath(os.path.dirname(__file__)), "static/uploads/videos/")
     # COVER_UPLOAD_URL = os.path.join(os.path.abspath(os.path.dirname(__file__)), "static/uploads/covers/")
 
+    def __init__(self):
+        pass
+
 class DevelopmentConfig(Config):
     DEBUG = True
     PORT = '3306'
@@ -47,9 +50,9 @@ class DevelopmentConfig(Config):
     REDIS_URL = "redis://localhost:6379/1"
 
 class ProductionConfig(Config):
-    HOSTNAME = '127.0.0.1'
-    PORT = '3306'
-    DATABASE = os.environ.get('DATABASE')
+    HOSTNAME = os.environ.get('DB_HOST')
+    PORT = os.environ.get('DB_PORT')
+    DATABASE = os.environ.get('DB_NAME')
     DB_USERNAME = os.environ.get('DB_USERNAME')
     DB_PASSWORD = os.environ.get('DB_PASSWORD')
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://{}:{}@{}:{}/{}?charset=utf8'.format(DB_USERNAME, DB_PASSWORD, HOSTNAME,
