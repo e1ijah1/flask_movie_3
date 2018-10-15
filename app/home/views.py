@@ -17,28 +17,6 @@ from app import videos, images
 from PIL import Image
 from app.decorators import admin_required
 
-@home.route('/initialize')
-def initialize():
-    admin_list = db.session.query(Admin).all()
-    if admin_list:
-        abort(404)
-    flash('数据表创建成功!')
-    admin = Admin(name='admin',
-                  email='admin@admin.com', password='admin')
-    db.session.add(admin)
-    flash('管理员账户: admin 密码: admin 准备提交')
-    tag_list = ['技术', '科普', '娱乐', '生活', '记录', '电影', '音乐']
-    for t in tag_list:
-        tag = VideoTag(name=t)
-        db.session.add(tag)
-        flash('标签列表准备提交')
-    try:
-        db.session.commit()
-        flash('所有事务提交成功!')
-    except:
-        flash('未知错误!')
-        db.session.rollback()
-    return redirect(url_for('admin.login_view'))
 
 @home.route('/')
 @cache.cached(30)

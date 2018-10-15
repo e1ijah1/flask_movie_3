@@ -36,8 +36,11 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    HOSTNAME = os.environ.get('DB_HOST', '127.0.0.1')
     PORT = '3306'
-    DATABASE = 'cilicili'
+    DATABASE = 'cili_db'
+    DB_USERNAME = os.environ.get('DB_USERNAME', 'root')
+    DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
 
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = 465
@@ -45,7 +48,9 @@ class DevelopmentConfig(Config):
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
-    SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://root:toor@localhost:{}/{}?charset=utf8'.format(PORT, DATABASE)
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://{}:{}@localhost:{}/{}?charset=utf8'.format(
+        DB_USERNAME, DB_PASSWORD, PORT, DATABASE
+    )
 
     REDIS_URL = "redis://localhost:6379/1"
 
@@ -55,8 +60,9 @@ class ProductionConfig(Config):
     DATABASE = os.environ.get('DB_NAME')
     DB_USERNAME = os.environ.get('DB_USERNAME')
     DB_PASSWORD = os.environ.get('DB_PASSWORD')
-    SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://{}:{}@{}:{}/{}?charset=utf8'.format(DB_USERNAME, DB_PASSWORD, HOSTNAME,
-                                                                                   PORT, DATABASE)
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://{}:{}@{}:{}/{}?charset=utf8'.format(
+        DB_USERNAME, DB_PASSWORD, HOSTNAME, PORT, DATABASE
+    )
 
 config = {
     'development': DevelopmentConfig,

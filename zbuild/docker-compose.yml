@@ -1,12 +1,18 @@
 version: '3'
 services:
   app:
-    build:
-      context: ./
-      dockerfile: app.dockerfile
+    #build:
+    #  context: ./
+    #  dockerfile: app.dockerfile
+    image: python:3.6-alpine
     working_dir: /var/www
     volumes:
       - ../:/var/www
+    command:
+      - /bin/ash
+      - -c
+      - |
+        pip install -r requirements.txt
     tty: true
     container_name: 'f_app'
 
@@ -26,10 +32,15 @@ services:
     volumes:
       - dbdata:/var/lib/mysql
     environment:
-      - "MYSQL_DATABASE=homestead"
-      - "MYSQL_USER=homestead"
-      - "MYSQL_PASSWORD=secret"
-      - "MYSQL_ROOT_PASSWORD=secret"
+      - 'MYSQL_USER=cili'
+      - 'MYSQL_PASSWORD=secret'
+      - 'MYSQL_ROOT_PASSWORD=secret'
     container_name: 'f_db'
-    ports:
-      - '
+
+  redis:
+    image: daocloud.io/library/redis:4.0.10-alpine
+    command: redis-server --appendonly yes
+    container_name: 'l_redis'
+
+volumes:
+  dbdata:

@@ -27,5 +27,25 @@ def inject_param():
     # admin_index = app.config['ADMIN_INDEX_URL']
     return dict(search_form=search_form, site_name=site_name)
 
+@manager.command
+def initialize():
+    db.create_all()
+    print('create tables success!')
+    from app.models import Admin
+    admin = Admin(name='admin', email='admin@admin.com', password='admin')
+    db.session.add(admin)
+    tag_list = ['技术', '科普', '娱乐', '生活', '记录', '电影', '音乐']
+    for t in tag_list:
+        tag = VideoTag(name=t)
+        db.session.add(tag)
+    try:
+        db.session.commit()
+        print(f'初始化成功!管理员账户: {admin.name}, 密码: admin')
+    except Exception as e:
+        print('初始化失败')
+        print(e)
+        db.session.rollback()
+
+
 if __name__ == '__main__':
     manager.run()

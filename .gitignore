@@ -2,3 +2,7 @@ uploads/
 envionment_variables.sh
 venv/
 .idea/
+venv2/
+old_requirements.txt
+__pycache__/
+__pycache__/*

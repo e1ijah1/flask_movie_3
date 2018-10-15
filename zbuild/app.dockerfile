@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM
 
 MAINTAINER f1renze <f1renze@126.com>
 
@@ -10,4 +10,6 @@ ENV WEB_CONFIG=production \
     MAIL_SERVER=xx \
     SITE_MAIL_SENDER=xx \
     SITE_ADMIN=asd \
-    SITE_DEFAULT_ADMIN_PASSWD=asd \
+    SITE_DEFAULT_ADMIN_PASSWD=asd
+
+WORKDIR /var/www
