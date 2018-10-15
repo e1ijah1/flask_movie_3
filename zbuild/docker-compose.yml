@@ -8,11 +8,7 @@ services:
     working_dir: /var/www
     volumes:
       - ../:/var/www
-    command:
-      - /bin/ash
-      - -c
-      - |
-        pip install -r requirements.txt
+    command: pip install -r requirements.txt
     tty: true
     container_name: 'f_app'
 

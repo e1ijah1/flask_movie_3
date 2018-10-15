@@ -1,2 +1,0 @@
-Flask>=0.7
-wtforms
