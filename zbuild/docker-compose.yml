@@ -8,7 +8,12 @@ services:
     working_dir: /var/www
     volumes:
       - ../:/var/www
-    command: pip install -r requirements.txt
+    command:
+      - /bin/ash
+      - -c
+      - |
+        pip install -r requirements.txt
+        gunicorn manage:app -c gunicorn.conf.py
     tty: true
     container_name: 'f_app'
 
