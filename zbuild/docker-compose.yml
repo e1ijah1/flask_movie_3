@@ -17,7 +17,7 @@ services:
     tty: true
     container_name: 'f_app'
 
-  web:
+  server:
     build:
       context: ./
       dockerfile: server.dockerfile
