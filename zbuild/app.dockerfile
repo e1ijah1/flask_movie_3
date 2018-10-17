@@ -10,4 +10,4 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     && apk add --no-cache --virtual build-dependencies \
     gcc musl-dev \
     mysql-client mariadb-dev build-base \
-    && pip install -r requirements.txt
+    && pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
