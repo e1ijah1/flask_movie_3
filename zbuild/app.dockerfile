@@ -13,9 +13,9 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     # mysqlclient
     mariadb-dev build-base \
     # pillow
-    jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev tiff-dev tk-dev tcl-dev \
+    jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev libjpeg openjpeg tiff-dev tk-dev tcl-dev \
     && pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
     && rm -fr /root/.cache/pip \
-    && apk del build-dependencies \
+    # && apk del build-dependencies \ # pillow & mysqlclient need dependencies!
     # mysql cli
     && apk add --no-cache mysql-client
