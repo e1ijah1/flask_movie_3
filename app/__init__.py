@@ -3,30 +3,23 @@
 __author__ = 'F1renze'
 __time__ = '2018/3/18 13:52'
 
-import os
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from config import config
 from flask_login import LoginManager
 from flask_mail import Mail
-from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
+from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_moment import Moment
 from flask_redis import FlaskRedis
 from flask_babelex import Babel
 from flask_caching import Cache
 
 db = SQLAlchemy()
-mail=Mail()
+mail = Mail()
 moment = Moment()
 rd = FlaskRedis()
 babel = Babel()
-cache = Cache(config={
-    'CACHE_TYPE': 'redis',
-    'CACHE_REDIS_HOST': os.environ.get('REDIS_HOST', '127.0.0.1'),
-    'CACHE_REDIS_PORT': 6379,
-    'CACHE_REDIS_DB': 2
-})
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -34,6 +27,7 @@ login_manager.login_view = 'auth.login'
 
 videos = UploadSet('videos', ('mp4', 'flv', 'avi', 'wmv', 'mov', 'webm', 'mpeg4', 'ts', 'mpg', 'rm', 'rmvb', 'mkv'))
 images = UploadSet('images', IMAGES)
+
 
 def create_app(configname):
     app = Flask(__name__)
@@ -46,6 +40,13 @@ def create_app(configname):
     from app.admin_blueprint import f_admin
     f_admin.init_app(app)
     babel.init_app(app)
+    # flask-caching
+    cache = Cache(config={
+        'CACHE_TYPE': 'redis',
+        'CACHE_REDIS_HOST': app.config['REDIS_HOST'],
+        'CACHE_REDIS_PORT': app.config['REDIS_PORT'],
+        'CACHE_REDIS_DB': 2
+    })
     cache.init_app(app)
 
     # flask-upload
@@ -63,4 +64,3 @@ def create_app(configname):
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
 
     return app
-

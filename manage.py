@@ -14,11 +14,14 @@ app = create_app(os.getenv('WEB_CONFIG') or 'default')
 manager = Manager(app)
 migrate = Migrate(app, db)
 
+
 def make_shell_context():
     return dict(app=app, db=db)
 
+
 manager.add_command('shell', Shell(make_context=make_shell_context))
 manager.add_command('db', MigrateCommand)
+
 
 @app.context_processor
 def inject_param():
@@ -27,12 +30,16 @@ def inject_param():
     # admin_index = app.config['ADMIN_INDEX_URL']
     return dict(search_form=search_form, site_name=site_name)
 
+
 @manager.command
 def initialize():
     db.create_all()
     print('create tables success!')
-    from app.models import Admin
-    admin = Admin(name='admin', email='admin@admin.com', password='admin')
+    admin = Admin(
+        name=app.config['DEFAULT_ADMIN'],
+        email=app.config['DEFAULT_ADMIN_EMAIL'],
+        pwd=app.config['DEFAULT_ADMIN_PWD']
+    )
     db.session.add(admin)
     tag_list = ['技术', '科普', '娱乐', '生活', '记录', '电影', '音乐']
     for t in tag_list:
@@ -40,7 +47,7 @@ def initialize():
         db.session.add(tag)
     try:
         db.session.commit()
-        print(f'初始化成功!管理员账户: {admin.name}, 密码: admin')
+        print(f'初始化成功!管理员账户: {admin.name}, 密码: {app.config["DEFAULT_ADMIN_EMAIL"]}')
     except Exception as e:
         print('初始化失败')
         print(e)

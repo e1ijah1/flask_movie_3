@@ -7,10 +7,11 @@ from app import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import current_app
-from flask_login import UserMixin, AnonymousUserMixin
+from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 import hashlib
+
 
 class VideoTag(db.Model):
     __tablename__ = 'video_tag'
@@ -22,6 +23,7 @@ class VideoTag(db.Model):
 
     def __repr__(self):
         return '[视频分类: %r]' % self.name
+
 
 ''' #使用多对多模型出现一系列问题??
 # 1. (_mysql_exceptions.IntegrityError) (1215, 'Cannot add foreign key constraint')
@@ -50,6 +52,7 @@ video_like = db.Table('video_like',
                       db.Column('video_id', db.Integer, db.ForeignKey('video.id')),
                       db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
                       )
+
 
 class Video(db.Model):
     __tablename__ = 'video'
@@ -99,6 +102,7 @@ class Video(db.Model):
 
     def __repr__(self):
         return '[视频: %r]' % self.title
+
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
@@ -313,6 +317,7 @@ class UserLog(db.Model):
     def __repr__(self):
         return '[用户日志: %r]' % self.user.username
 
+
 class Comment(db.Model):
     __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True)
@@ -416,6 +421,12 @@ class Admin(db.Model, UserMixin):
         except:
             db.session.rollback()
         return True
+
+    def __init__(self, name, email, pwd, *args, **kws):
+        super().__init__(*args, **kws)
+        self.name = name
+        self.email = email
+        self.password = pwd
 
     def __repr__(self):
         return '[管理员: %r]' % self.name
