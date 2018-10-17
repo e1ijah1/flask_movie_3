@@ -1,4 +1,4 @@
-FROM
+FROM python:3.6-alpine
 
 MAINTAINER f1renze <f1renze@126.com>
 
