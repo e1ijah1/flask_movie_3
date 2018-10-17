@@ -14,5 +14,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     mariadb-dev build-base \
     # pillow
     jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev tiff-dev tk-dev tcl-dev \
-    mysql-client
+    # mysql cli
+    mysql-client \
     && pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
