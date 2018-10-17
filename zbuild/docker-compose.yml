@@ -1,19 +1,14 @@
 version: '2'
 services:
   app:
-    #build:
-    #  context: ./
-    #  dockerfile: app.dockerfile
-    image: python:3.6-alpine
+    build:
+      context: ./
+      dockerfile: app.dockerfile
+    #image: python:3.6-alpine
     working_dir: /var/www
     volumes:
       - ../:/var/www
-    command:
-      - /bin/ash
-      - -c
-      - |
-        pip install -r requirements.txt
-        gunicorn manage:app -c gunicorn.conf.py
+    command: pip install -r requirements.txt
     tty: true
     container_name: 'f_app'
 
