@@ -70,6 +70,7 @@ class Config:
 
 class DevelopmentConfig(Config):
     DEBUG = True
+    DEBUG_TB_INTERCEPT_REDIRECTS = False
 
 
 class ProductionConfig(Config):
@@ -79,6 +80,5 @@ class ProductionConfig(Config):
 config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
-
     'default': DevelopmentConfig
 }

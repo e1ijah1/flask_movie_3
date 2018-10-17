@@ -6,6 +6,7 @@ Flask==1.0.2
 Flask-Admin==1.5.2
 Flask-BabelEx==0.9.3
 Flask-Caching==1.4.0
+Flask-DebugToolbar==0.10.1
 Flask-Login==0.4.1
 Flask-Mail==0.9.1
 Flask-Migrate==2.2.1

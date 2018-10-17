@@ -5,49 +5,54 @@ __time__ = '2018/3/18 13:52'
 
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from config import config
-from flask_login import LoginManager
 from flask_mail import Mail
-from flask_uploads import UploadSet, configure_uploads, IMAGES
 from flask_moment import Moment
-from flask_redis import FlaskRedis
 from flask_babelex import Babel
 from flask_caching import Cache
+from flask_redis import FlaskRedis
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
+from flask_debugtoolbar import DebugToolbarExtension
+from flask_uploads import UploadSet, configure_uploads, IMAGES
 
-db = SQLAlchemy()
+cache = Cache(config={})
 mail = Mail()
+babel = Babel()
 moment = Moment()
 rd = FlaskRedis()
-babel = Babel()
+db = SQLAlchemy()
+toolbar = DebugToolbarExtension()
 
 login_manager = LoginManager()
-login_manager.session_protection = 'strong'
 login_manager.login_view = 'auth.login'
+login_manager.session_protection = 'strong'
 
-videos = UploadSet('videos', ('mp4', 'flv', 'avi', 'wmv', 'mov', 'webm', 'mpeg4', 'ts', 'mpg', 'rm', 'rmvb', 'mkv'))
 images = UploadSet('images', IMAGES)
+videos = UploadSet('videos', ('mp4', 'flv', 'avi', 'wmv', 'mov', 'webm', 'mpeg4', 'ts', 'mpg', 'rm', 'rmvb', 'mkv'))
 
 
 def create_app(configname):
     app = Flask(__name__)
     app.config.from_object(config[configname])
+
     db.init_app(app)
-    login_manager.init_app(app)
-    mail.init_app(app)
-    moment.init_app(app)
     rd.init_app(app)
+    mail.init_app(app)
+    babel.init_app(app)
+    moment.init_app(app)
+    toolbar.init_app(app)
+    login_manager.init_app(app)
+
     from app.admin_blueprint import f_admin
     f_admin.init_app(app)
-    babel.init_app(app)
     # flask-caching
-    cache = Cache(config={
+    cache.init_app(app, config={
         'CACHE_TYPE': 'redis',
         'CACHE_REDIS_HOST': app.config['REDIS_HOST'],
         'CACHE_REDIS_PORT': app.config['REDIS_PORT'],
         'CACHE_REDIS_DB': 2
     })
-    cache.init_app(app)
 
     # flask-upload
     configure_uploads(app, (videos, images))

@@ -442,4 +442,3 @@ class AdminLog(db.Model):
 
     def __repr__(self):
         return '[管理员日志: %r]' % self.admin.name
-
