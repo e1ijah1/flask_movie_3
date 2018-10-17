@@ -46,10 +46,10 @@ def initialize() {
 
 def setUpApp() {
     def containerName = 'f_app'
-    sh """
-        docker exec ${containerName} sh -c 'export WEB_CONFIG=${WEB_CONFIG} DB_HOST=${DB_HOST} DB_PORT=${DB_PORT} DB_NAME=${DB_NAME} REDIS_HOST=${REDIS_HOST} MAIL_SERVER=${MAIL_SERVER} MAIL_USERNAME=${MAIL_USERNAME} MAIL_PASSWORD=${MAIL_PASSWORD} SITE_MAIL_SENDER=${SITE_MAIL_SENDER}'
-        docker exec ${containerName} sh -c 'mysql -hdatabase -uroot -psecret < initial.sql'
-        docker exec ${containerName} sh -c 'python manage.py initialize'
-        docker exec ${containerName} sh -c 'gunicorn manage:app -c gunicorn.conf.py'
-    """
+    sh '''
+        docker exec ${containerName} sh -c "export WEB_CONFIG=${WEB_CONFIG} DB_HOST=${DB_HOST} DB_PORT=${DB_PORT} DB_NAME=${DB_NAME} REDIS_HOST=${REDIS_HOST} MAIL_SERVER=${MAIL_SERVER} MAIL_USERNAME=${MAIL_USERNAME} MAIL_PASSWORD=${MAIL_PASSWORD} SITE_MAIL_SENDER=${SITE_MAIL_SENDER}"
+        docker exec ${containerName} sh -c "mysql -hdatabase -uroot -psecret < initial.sql"
+        docker exec ${containerName} sh -c "python manage.py initialize"
+        docker exec ${containerName} sh -c "gunicorn manage:app -c gunicorn.conf.py"
+    '''
 }
