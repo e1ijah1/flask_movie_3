@@ -3,9 +3,10 @@ pipeline {
 
     environment {
         WEB_CONFIG = 'production'
-        DB_HOST = 'database'
-        DB_PORT = 3306
-        DB_NAME = 'cili_db'
+        MYSQL_HOST = 'database'
+        MYSQL_DB = 'cili_db'
+        MYSQL_USR = credentials('MYSQL_USR')
+        MYSQL_PWD = credentials('MYSQL_PWD')
         REDIS_HOST = 'redis'
         MAIL_SERVER = credentials('MAIL_SERVER')
         MAIL_USERNAME = credentials('MAIL_USERNAME')
@@ -47,8 +48,8 @@ def initialize() {
 def setUpApp() {
     def containerName = 'f_app'
     sh """
-        docker exec ${containerName} sh -c "export WEB_CONFIG=${WEB_CONFIG} DB_HOST=${DB_HOST} DB_PORT=${DB_PORT} DB_NAME=${DB_NAME} REDIS_HOST=${REDIS_HOST} MAIL_SERVER=${MAIL_SERVER} MAIL_USERNAME=${MAIL_USERNAME} MAIL_PASSWORD=${MAIL_PASSWORD} SITE_MAIL_SENDER=${SITE_MAIL_SENDER}"
-        docker exec ${containerName} sh -c "mysql -hdatabase -uroot -psecret < initial.sql"
+        docker exec ${containerName} sh -c "export WEB_CONFIG=${WEB_CONFIG} MYSQL_HOST=${MYSQL_HOST} MYSQL_DB=${MYSQL_DB} MYSQL_USR=${MYSQL_USR} MYSQL_PWD=${MYSQL_PWD} REDIS_HOST=${REDIS_HOST} MAIL_SERVER=${MAIL_SERVER} MAIL_USERNAME=${MAIL_USERNAME} MAIL_PASSWORD=${MAIL_PASSWORD} SITE_MAIL_SENDER=${SITE_MAIL_SENDER}"
+        docker exec ${containerName} sh -c "mysql -hdatabase -u${MYSQL_USR} -p${MYSQL_PWD} < initial.sql"
         docker exec ${containerName} sh -c "python manage.py initialize"
         docker exec ${containerName} sh -c "gunicorn manage:app -c gunicorn.conf.py"
     """

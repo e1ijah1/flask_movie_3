@@ -31,11 +31,11 @@ class Config:
     REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}"
 
     # MySQL
-    MYSQL_HOST = os.environ.get('DB_HOST', 'localhost')
-    MYSQL_PORT = os.environ.get('DB_PORT', 3306)
-    MYSQL_DB = os.environ.get('DB_NAME', 'cili_db')
-    MYSQL_USR = os.environ.get('DB_USERNAME', 'root')
-    MYSQL_PWD = os.environ.get('DB_PASSWORD', '')
+    MYSQL_HOST = os.environ.get('MYSQL_HOST', 'localhost')
+    MYSQL_PORT = os.environ.get('MYSQL_PORT', 3306)
+    MYSQL_DB = os.environ.get('MYSQL_DB', 'cili_db')
+    MYSQL_USR = os.environ.get('MYSQL_USR', 'root')
+    MYSQL_PWD = os.environ.get('MYSQL_PWD', '')
     SQLALCHEMY_DATABASE_URI = f'mysql+mysqldb://{MYSQL_USR}:{MYSQL_PWD}' \
                               f'@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}?charset=utf8'
 
