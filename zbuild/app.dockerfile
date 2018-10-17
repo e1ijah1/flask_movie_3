@@ -8,6 +8,11 @@ ADD requirements.txt /var/www/
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories \
     && apk add --no-cache --virtual build-dependencies \
+    # gevent
     gcc musl-dev \
-    mysql-client mariadb-dev build-base \
+    # mysqlclient
+    mariadb-dev build-base \
+    # pillow
+    jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev tiff-dev tk-dev tcl-dev \
+    mysql-client
     && pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
