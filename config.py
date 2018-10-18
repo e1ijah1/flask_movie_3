@@ -36,7 +36,7 @@ class Config:
     MYSQL_DB = os.environ.get('MYSQL_DB', 'cili_db')
     MYSQL_USR = os.environ.get('MYSQL_USR', 'root')
     MYSQL_PWD = os.environ.get('MYSQL_PWD', '')
-    SQLALCHEMY_DATABASE_URI = f'mysql+mysqldb://{MYSQL_USR}:{MYSQL_PWD}' \
+    SQLALCHEMY_DATABASE_URI = f'mysql://{MYSQL_USR}:{MYSQL_PWD}' \
                               f'@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}?charset=utf8'
 
     # ADMIN_INDEX_URL = '/power'  # admin login page url

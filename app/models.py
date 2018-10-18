@@ -16,7 +16,7 @@ import hashlib
 class VideoTag(db.Model):
     __tablename__ = 'video_tag'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), unique=True)
+    name = db.Column(db.String(85), unique=True)
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
     videos = db.relationship('Video', backref='video_tag',
                              lazy='dynamic', cascade='all, delete-orphan')
@@ -58,11 +58,11 @@ class Video(db.Model):
     __tablename__ = 'video'
     id = db.Column(db.Integer, primary_key=True)
     uploader_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    title = db.Column(db.String(255), unique=True)
-    url = db.Column(db.String(255), unique=True)
+    title = db.Column(db.String(85), unique=True)
+    url = db.Column(db.String(85), unique=True)
     intro = db.Column(db.Text)
-    cover = db.Column(db.Unicode(255), unique=True)
-    thumbnail_cover = db.Column(db.Unicode(255), unique=True)
+    cover = db.Column(db.Unicode(85), unique=True)
+    thumbnail_cover = db.Column(db.Unicode(85), unique=True)
     playnum = db.Column(db.BigInteger)
     tag_id = db.Column(db.Integer, db.ForeignKey('video_tag.id'))
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
@@ -107,15 +107,15 @@ class Video(db.Model):
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(128), unique=True, index=True)
+    username = db.Column(db.String(85), unique=True, index=True)
     email = db.Column(db.String(64), unique=True, index=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String(85), nullable=False)
     phone = db.Column(db.String(11), index=True)
     location = db.Column(db.String(64))
     info = db.Column(db.Text)
     avatar_hash = db.Column(db.String(32))
-    head_img = db.Column(db.Unicode(128), unique=False, nullable=True)
-    thumb_head_img = db.Column(db.Unicode(128), unique=False, nullable=True)
+    head_img = db.Column(db.Unicode(85), unique=False, nullable=True)
+    thumb_head_img = db.Column(db.Unicode(85), unique=False, nullable=True)
     confirmed = db.Column(db.Boolean, default=False)
     member_since = db.Column(db.DateTime(), default=datetime.now)
     last_visit = db.Column(db.DateTime(), default=datetime.now)
@@ -310,7 +310,7 @@ class UserLog(db.Model):
     __tablename__ = 'user_log'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    ip = db.Column(db.String(128), index=True)
+    ip = db.Column(db.String(85), index=True)
     info = db.Column(db.String(32))
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
@@ -334,10 +334,10 @@ class Comment(db.Model):
 class Admin(db.Model, UserMixin):
     __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), unique=True, index=True)
+    name = db.Column(db.String(85), unique=True, index=True)
     email = db.Column(db.String(64), unique=True, index=True, nullable=False)
     confirmed = db.Column(db.Boolean, default=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String(85), nullable=False)
     admin_logs = db.relationship('AdminLog', backref='admin', lazy='dynamic')
 
     @property
@@ -436,7 +436,7 @@ class AdminLog(db.Model):
     __tablename__ = 'admin_log'
     id = db.Column(db.Integer, primary_key=True)
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'))
-    ip = db.Column(db.String(128), index=True)
+    ip = db.Column(db.String(85), index=True)
     info = db.Column(db.Text)
     add_time = db.Column(db.DateTime, index=True, default=datetime.now)
 
