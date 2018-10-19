@@ -5,13 +5,13 @@ pipeline {
         WEB_CONFIG = 'production'
         MYSQL_HOST = 'database'
         MYSQL_DB = 'cili_db'
-        MYSQL_USR = credentials('MYSQL_USR')
-        MYSQL_PWD = credentials('MYSQL_PWD')
+        // MYSQL_USR = credentials('MYSQL_USR')
+        // MYSQL_PWD = credentials('MYSQL_PWD')
         REDIS_HOST = 'redis'
-        MAIL_SERVER = credentials('MAIL_SERVER')
-        MAIL_USERNAME = credentials('MAIL_USERNAME')
-        MAIL_PASSWORD = credentials('MAIL_PASSWORD')
-        SITE_MAIL_SENDER= credentials('SITE_MAIL_SENDER')
+        // MAIL_SERVER = credentials('MAIL_SERVER')
+        // MAIL_USERNAME = credentials('MAIL_USERNAME')
+        // MAIL_PASSWORD = credentials('MAIL_PASSWORD')
+        // SITE_MAIL_SENDER = credentials('SITE_MAIL_SENDER')
     }
 
     options {
