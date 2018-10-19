@@ -19,6 +19,15 @@ pipeline {
         disableConcurrentBuilds()
     }
     stages {
+        stage ('Checkout Project') {
+            steps { getCode() }
+            post {
+                failure {
+                    echo 'Checkout failed, pls check log'
+                }
+            }
+        }
+        }
         stage ('Build') {
             steps { initialize() }
             post {
@@ -36,6 +45,21 @@ pipeline {
                 }
             }
         }
+    }
+}
+
+def getCode() {
+    if (srcType == 'Git') {
+        checkout([
+        $class: 'GitSCM',
+        branches: [[name: '*/master']],
+        doGenerateSubmoduleConfigurations: false,
+        extensions: [], submoduleCfg: [],
+        userRemoteConfigs: [[
+            credentialsId: 'github_pk',
+            url: 'https://github.com/F1renze/flask_movie_3'
+        ]]
+        ])
     }
 }
 
