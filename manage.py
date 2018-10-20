@@ -33,6 +33,7 @@ def inject_param():
 
 @manager.command
 def initialize():
+    print(app.config)
     db.create_all()
     print('create tables success!')
     admin = Admin(
