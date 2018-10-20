@@ -19,7 +19,7 @@ pipeline {
         disableConcurrentBuilds()
     }
     stages {
-        stage ('Checkout Project') {
+        stage('Checkout Project') {
             steps { getCode() }
             post {
                 failure {
@@ -27,8 +27,8 @@ pipeline {
                 }
             }
         }
-        }
-        stage ('Build') {
+
+        stage('Build') {
             steps { initialize() }
             post {
                 failure {
@@ -36,7 +36,7 @@ pipeline {
                 }
             }
         }
-        stage ('SetUp') {
+        stage('SetUp') {
             steps { setUpApp() }
             post {
                 failure {
@@ -46,6 +46,7 @@ pipeline {
             }
         }
     }
+}
 
 
 def getCode() {
