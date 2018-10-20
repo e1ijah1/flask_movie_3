@@ -20,7 +20,10 @@ pipeline {
     }
     stages {
         stage('Checkout Project') {
-            steps { getCode() }
+            steps {
+                // getCode()
+                echo 'pass'
+            }
             post {
                 failure {
                     echo 'Checkout failed, pls check log'
