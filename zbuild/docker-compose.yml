@@ -7,9 +7,19 @@ services:
     working_dir: /var/www
     volumes:
       - ../:/var/www
-    #command: pip install -r requirements.txt
     tty: true
     container_name: 'f_app'
+    environment:
+      - WEB_CONFIG=${APP_WEBC}
+      - MYSQL_HOST=${APP_MH}
+      - MYSQL_DB=${APP_MDB}
+      - MYSQL_USR=${APP_MU}
+      - MYSQL_PWD=${APP_MP}
+      - REDIS_HOST=${APP_RH}
+      - MAIL_SERVER=${APP_MAILS}
+      - MAIL_USERNAME=${APP_MAILU}
+      - MAIL_PASSWORD=${APP_MAILP}
+      - MAIL_SENDER=${APP_SENDER}
 
   server:
     build:
@@ -27,9 +37,9 @@ services:
     volumes:
       - dbdata:/var/lib/mysql
     environment:
-      - 'MYSQL_USER=cili'
-      - 'MYSQL_PASSWORD=secret'
-      - 'MYSQL_ROOT_PASSWORD=secret'
+      - MYSQL_USER=${DB_MU}
+      - MYSQL_PASSWORD=${DB_MUP}
+      - MYSQL_ROOT_PASSWORD=${DB_MRP}
     container_name: 'f_db'
 
   redis:

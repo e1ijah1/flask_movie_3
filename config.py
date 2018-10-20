@@ -19,10 +19,11 @@ class Config:
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
     MAIL_PORT = os.environ.get('MAIL_PORT', 465)
     MAIL_USE_SSL = True
+    # mail login
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    SITE_MAIL_SUBJECT_PREFIX = "[" + SITE_NAME + "] "
-    SITE_MAIL_SENDER = os.environ.get('SITE_MAIL_SENDER')
+    MAIL_SUBJECT_PREFIX = "[" + SITE_NAME + "] "
+    MAIL_SENDER = os.environ.get('MAIL_SENDER')
 
     # Redis
     REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
