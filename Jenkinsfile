@@ -46,7 +46,7 @@ pipeline {
             }
         }
     }
-}
+
 
 def getCode() {
     if (srcType == 'Git') {
@@ -70,7 +70,7 @@ def initialize() {
 }
 
 def setUpApp() {
-    def containerName = 'f_app'
+    String containerName = 'f_app'
     sh """
         docker exec ${containerName} sh -c "export WEB_CONFIG=${WEB_CONFIG} MYSQL_HOST=${MYSQL_HOST} MYSQL_DB=${MYSQL_DB} MYSQL_USR=${MYSQL_USR} MYSQL_PWD=${MYSQL_PWD} REDIS_HOST=${REDIS_HOST} MAIL_SERVER=${MAIL_SERVER} MAIL_USERNAME=${MAIL_USERNAME} MAIL_PASSWORD=${MAIL_PASSWORD} SITE_MAIL_SENDER=${SITE_MAIL_SENDER}"
         docker exec ${containerName} sh -c "echo $WEB_CONFIG $MYSQL_HOST $MYSQL_DB $MYSQL_USR $MYSQL_PWD $MAIL_SERVER $MAIL_USERNAME $MAIL_PASSWORD $SITE_MAIL_SENDER"
