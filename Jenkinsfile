@@ -1,20 +1,12 @@
-String appWebConfig = 'production'
-String appMysqlHost = 'database'
-String appMysqlDB = 'cili_db'
-String appMysqlUser = env.APP_MU
-String appMysqlPwd = env.APP_MP
-String appRedisHost = 'redis'
-String appMailServer = env.APP_MAILS
-String appMailUser = env.APP_MAILU
-String appMailPwd = env.APP_MAILP
-String appMailSender = env.APP_SENDER
-String dbMysqlUser = env.DB_MU
-String dbMysqlPwd = env.DB_MUP
-String dbMysqlRootPwd = env.DB_MRP
-
-
 pipeline {
     agent any
+
+    parameters {
+        string(name: 'webConfig', defaultValue: 'production', description: 'appWebConfig')
+        string(name: 'mysqlHost', defaultValue: 'database', description: 'appMysqlHost')
+        string(name: 'mysqlDB', defaultValue: 'cili_db', description: 'appMysqlDB')
+        string(name: 'redisHost', defaultValue: 'redis', description: 'appRedisHost')
+    }
 
     options {
         timeout(time: 1, unit: 'DAYS')
@@ -70,6 +62,19 @@ def getCode() {
 }
 
 def initialize() {
+    String appWebConfig = 'production'
+    String appMysqlHost = 'database'
+    String appMysqlDB = 'cili_db'
+    String appMysqlUser = env.APP_MU
+    String appMysqlPwd = env.APP_MP
+    String appRedisHost = 'redis'
+    String appMailServer = env.APP_MAILS
+    String appMailUser = env.APP_MAILU
+    String appMailPwd = env.APP_MAILP
+    String appMailSender = env.APP_SENDER
+    String dbMysqlUser = env.DB_MU
+    String dbMysqlPwd = env.DB_MUP
+    String dbMysqlRootPwd = env.DB_MRP
     sh """
         export APP_WEBC=${appWebConfig} APP_MH=${appMysqlHost} APP_MDB=${appMysqlDB} APP_MU=${appMysqlUser} APP_MP=${appMysqlPwd} APP_RH=${appRedisHost} APP_MAILS=${appMailServer} APP_MAILU=${appMailUser} APP_MAILP=${appMailPwd} APP_SENDER=${appMailSender} DB_MU=${dbMysqlUser} DB_MUP=${dbMysqlPwd} DB_MRP=${dbMysqlRootPwd}
         echo \$WEB_CONFIG \$MYSQL_HOST \$MYSQL_DB \$MYSQL_USR \$MYSQL_PWD \$REDIS_HOST \$MAIL_SERVER \$MAIL_USERNAME \$MAIL_PASSWORD \$MAIL_SENDER 
@@ -79,6 +84,8 @@ def initialize() {
 
 def setUpApp() {
     String containerName = 'f_app'
+    String appMysqlUser = env.APP_MU
+    String appMysqlPwd = env.APP_MP
     sh """
         docker exec ${containerName} sh -c "echo \$WEB_CONFIG \$MYSQL_HOST \$MYSQL_DB \$MYSQL_USR \$MYSQL_PWD \$REDIS_HOST \$MAIL_SERVER \$MAIL_USERNAME \$MAIL_PASSWORD \$MAIL_SENDER"
         docker exec ${containerName} sh -c "mysql -hdatabase -u${appMysqlUser} -p${appMysqlPwd} < initial.sql"
