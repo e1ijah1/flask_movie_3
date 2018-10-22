@@ -51,7 +51,7 @@ def initialize() {
     String appMailSender = env.APP_SENDER
 
     sh """
-        export APP_WEBC=${appWebConfig} APP_MH=${appMysqlHost} APP_MDB=${appMysqlDB} APP_MU=${appMysqlUser} APP_MP=${appMysqlPwd} APP_RH=${appRedisHost} APP_MAILS=${appMailServer} APP_MAILU=${appMailUser} APP_MAILP=${appMailPwd} APP_SENDER=${appMailSender} DB_MU=${dbMysqlUser} DB_MUP=${dbMysqlPwd} DB_MRP=${dbMysqlRootPwd}
+        export APP_WEBC=${appWebConfig} APP_MH=${appMysqlHost} APP_MDB=${appMysqlDB} APP_MU=${appMysqlUser} APP_MP=${appMysqlPwd} APP_RH=${appRedisHost} APP_MAILS=${appMailServer} APP_MAILU=${appMailUser} APP_MAILP=${appMailPwd} APP_SENDER=${appMailSender}        
         echo \$WEB_CONFIG \$MYSQL_HOST \$MYSQL_DB \$MYSQL_USR \$MYSQL_PWD \$REDIS_HOST \$MAIL_SERVER \$MAIL_USERNAME \$MAIL_PASSWORD \$MAIL_SENDER 
         docker-compose -f zbuild/docker-compose.yml up -d --build
     """
