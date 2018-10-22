@@ -13,7 +13,7 @@ class Config:
     # initial setting
     DEFAULT_ADMIN = os.environ.get('ADMIN', 'admin')
     DEFAULT_ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@admin.com')
-    DEFAULT_ADMIN_PASSWD = os.environ.get('ADMIN_PWD', 'admin')
+    DEFAULT_ADMIN_PWD = os.environ.get('ADMIN_PWD', 'admin')
 
     # Mail
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
