@@ -18,4 +18,5 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     && rm -fr /root/.cache/pip \
     # && apk del build-dependencies \ # pillow & mysqlclient need dependencies!
     # mysql cli
-    && apk add --no-cache mysql-client
+    && apk add --no-cache mysql-client \
+    && mkdir logs

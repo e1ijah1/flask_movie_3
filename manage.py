@@ -13,7 +13,7 @@ from app.home.forms import SearchForm
 app = create_app(os.getenv('WEB_CONFIG') or 'default')
 manager = Manager(app)
 migrate = Migrate(app, db)
-
+db_engine  = db.get_engine(app)
 
 def make_shell_context():
     return dict(app=app, db=db)
@@ -33,7 +33,9 @@ def inject_param():
 
 @manager.command
 def initialize():
-    print(app.config)
+    # print(app.config)
+    if database_is_empty():
+        return
     db.create_all()
     print('create tables success!')
     admin = Admin(
@@ -53,6 +55,19 @@ def initialize():
         print('初始化失败')
         print(e)
         db.session.rollback()
+
+
+def table_exists(name):
+    result = db_engine.dialect.has_table(db_engine, name)
+    print(f'Table {name} exists: {result}')
+    return result
+
+
+def database_is_empty():
+    table_names = db.inspect(db_engine).get_table_names()
+    result = table_names == []
+    print(f'DB is empty: {result}')
+    return result
 
 
 if __name__ == '__main__':

@@ -64,6 +64,6 @@ def setUpApp() {
     sh """
         docker exec ${containerName} sh -c "mysql -hdatabase -u${appMysqlUser} -p${appMysqlPwd} < initial.sql"
         docker exec ${containerName} sh -c "python manage.py initialize"
-        docker exec ${containerName} sh -c "gunicorn manage:app -c gunicorn.conf.py -D"
+        docker exec ${containerName} sh -c "gunicorn manage:app -c gunicorn.conf.py"
     """
 }
