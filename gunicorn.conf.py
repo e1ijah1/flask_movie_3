@@ -7,3 +7,7 @@ __time__ = '18-5-15 上午10:35'
 workers = 3
 worker_class = "gevent"   # 采用gevent库, 支持异步处理请求, 提高吞吐量
 bind = "0.0.0.0:8000"    # 监听IP放宽, 以便于Docker之间/Docker和宿主机之间的通信
+
+loglevel = 'warning'
+accesslog = "/var/www/log/gunicorn_access.log"      #访问日志文件
+errorlog = "/var/www/log/gunicorn_error.log"        #错误日志文件

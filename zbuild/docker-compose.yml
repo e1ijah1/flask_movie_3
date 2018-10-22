@@ -36,10 +36,6 @@ services:
     image: daocloud.io/mysql:5.7.4
     volumes:
       - dbdata:/var/lib/mysql
-    environment:
-      - MYSQL_USER=${DB_MU}
-      - MYSQL_PASSWORD=${DB_MUP}
-      - MYSQL_ROOT_PASSWORD=${DB_MRP}
     container_name: 'f_db'
 
   redis:
