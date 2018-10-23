@@ -71,6 +71,7 @@ Update: 2018.10.22
   $ docker exec -it f_app /bin/ash
   /var/www # mysql -h $MYSQL_HOST -u$MYSQL_USR -p$MYSQL_PWD < initial.sql
   /var/www # python manage.py initialize
+  /var/www # mkdir logs && chmod 777 logs
   /var/www # gunicorn manage:app -c gunicorn.conf.py
   ```
 
