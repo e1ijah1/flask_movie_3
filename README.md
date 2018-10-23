@@ -69,7 +69,7 @@ Update: 2018.10.22
 
   ```shell
   $ docker exec -it f_app /bin/ash
-  /var/www # mysql -hdatabase -u$APP_MU -p$APP_MP < initial.sql
+  /var/www # mysql -h $MYSQL_HOST -u$MYSQL_USR -p$MYSQL_PWD < initial.sql
   /var/www # python manage.py initialize
   /var/www # gunicorn manage:app -c gunicorn.conf.py
   ```

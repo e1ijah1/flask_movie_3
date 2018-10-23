@@ -34,7 +34,8 @@ def inject_param():
 @manager.command
 def initialize():
     # print(app.config)
-    if database_is_empty():
+    if not database_is_empty():
+        print('Pls don\'t repeat initialization!')
         return
     db.create_all()
     print('create tables success!')
