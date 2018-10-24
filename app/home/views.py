@@ -19,7 +19,7 @@ from app.decorators import admin_required
 
 
 @home.route('/')
-@cache.cached(30)
+# @cache.cached(30)
 def index():
     # flash('欢迎!')
     page = request.args.get('page', 1, type=int)

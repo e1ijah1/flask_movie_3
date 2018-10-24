@@ -63,7 +63,7 @@ def setUpApp() {
     String appMysqlPwd = env.APP_MP
     sh """
         docker exec ${containerName} sh -c "mysql -hdatabase -u${appMysqlUser} -p${appMysqlPwd} < initial.sql"
-        docker exec ${containerName} sh -c "python manage.py initialize && mkdir logs && chmod 777 logs"
+        docker exec ${containerName} sh -c "python manage.py initialize"
         docker exec ${containerName} sh -c "gunicorn manage:app -c gunicorn.conf.py"
     """
 }

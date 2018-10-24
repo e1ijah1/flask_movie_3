@@ -1,8 +1,12 @@
-from threading import Thread
-from flask import current_app, render_template
-from flask_mail import Message
+# -*- coding: utf-8 -*-
+
+# import sendgrid
 from . import mail
+# from sendgrid.helpers.mail import Email, Content
+from threading import Thread
 from datetime import datetime
+from flask_mail import Message
+from flask import current_app, render_template
 
 
 def send_async_email(app, msg):
@@ -23,3 +27,10 @@ def send_email(to, subject, template, **kwargs):
     thr = Thread(target=send_async_email, args=[app, msg])
     thr.start()
     return thr
+
+# def send_email(to, subject, template, **kws):
+#     sg = sendgrid.SendGridAPIClient(apikey=current_app.config['MAIL_PASSWORD'])
+#     from_email = Email(current_app.config['MAIL_SENDER'])
+#     to_email = Email(to)
+#     # MIME type
+#     content = Content('text/plain')
