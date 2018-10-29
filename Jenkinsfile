@@ -49,10 +49,12 @@ def initialize() {
     String appMailUser = env.APP_MAILU
     String appMailPwd = env.APP_MAILP
     String appMailSender = env.APP_SENDER
-
+    // how to check in shell:
+    // if [ "$(docker inspect f_app 2> /dev/null)" = "[]" ]; then echo 1; else echo 2;fi
     sh """
         export APP_WEBC=${appWebConfig} APP_MH=${appMysqlHost} APP_MDB=${appMysqlDB} APP_MU=${appMysqlUser} APP_MP=${appMysqlPwd} APP_RH=${appRedisHost} APP_MAILS=${appMailServer} APP_MAILU=${appMailUser} APP_MAILP=${appMailPwd} APP_SENDER=${appMailSender}        
-        echo \$WEB_CONFIG \$MYSQL_HOST \$MYSQL_DB \$MYSQL_USR \$MYSQL_PWD \$REDIS_HOST \$MAIL_SERVER \$MAIL_USERNAME \$MAIL_PASSWORD \$MAIL_SENDER 
+        echo \$WEB_CONFIG \$MYSQL_HOST \$MYSQL_DB \$MYSQL_USR \$MYSQL_PWD \$REDIS_HOST \$MAIL_SERVER \$MAIL_USERNAME \$MAIL_PASSWORD \$MAIL_SENDER
+        if [ "$(docker inspect f_app 2> /dev/null)" != "[]" ]; then docker -compose -f zbuild/docker-compose.yml down; fi
         docker-compose -f zbuild/docker-compose.yml up -d --build
     """
 }
