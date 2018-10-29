@@ -52,7 +52,7 @@ def initialize() {
     // how to check in shell:
     // if [ "$(docker inspect f_app 2> /dev/null)" = "[]" ]; then echo 1; else echo 2;fi
     sh """
-        if [ "$(docker inspect f_app 2> /dev/null)" != "[]" ]; then docker -compose -f zbuild/docker-compose.yml down; fi
+        if [ "\$(docker inspect f_app 2> /dev/null)" != "[]" ]; then docker -compose -f zbuild/docker-compose.yml down; fi
     """
 
     sh """
