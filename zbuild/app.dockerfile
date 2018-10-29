@@ -16,8 +16,9 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev libjpeg openjpeg tiff-dev tk-dev tcl-dev \
     && pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
     && rm -fr /root/.cache/pip \
-    # && apk del build-dependencies \ # pillow & mysqlclient need dependencies!
+    # can not delete, pillow & mysqlclient need dependencies!
+    # && apk del build-dependencies \
     # mysql cli
     && apk add --no-cache mysql-client
 
-RUN mkdir logs && chown -R $USER logs
+RUN mkdir logs && chmod 666 logs
