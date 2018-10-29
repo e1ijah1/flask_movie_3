@@ -20,4 +20,4 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
     # mysql cli
     && apk add --no-cache mysql-client
 
-RUN mkdir logs && chown -R logs
+RUN mkdir logs && chown -R $USER logs
